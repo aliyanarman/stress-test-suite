@@ -91,7 +91,7 @@ export default function Index() {
           <h1 className="text-5xl font-bold tracking-tight text-foreground mb-3" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
             Alight
           </h1>
-          <p className="text-lg text-foreground/90">Calculate your deal on feet</p>
+          <p className="text-lg text-foreground/90">Your pocket financial analyst</p>
 
           {/* FIXED: Industry selector hidden for breakeven (kept behavior), visible for all others */}
           <div className={`absolute top-0 right-0 transition-all duration-300 ${activeCalc === 'breakeven' ? 'opacity-0 pointer-events-none -translate-y-5' : 'opacity-100'}`}>
@@ -125,6 +125,9 @@ export default function Index() {
           <button onClick={() => setShowSavedDeals(true)} className="text-xs text-foreground/60 hover:text-foreground transition-colors cursor-pointer underline">
             Saved Deals ({savedDeals.length})
           </button>
+          <a href="https://github.com/aliyanarman/Pocket-Financial-Analyst/blob/main/Alight_Technical_Documentation.pdf" target="_blank" rel="noopener noreferrer" className="text-xs text-foreground/60 hover:text-foreground transition-colors cursor-pointer underline">
+            Guide
+          </a>
         </div>
         <p className="text-xs text-foreground/60">© 2026 Aliyan Arman. All rights reserved.</p>
       </div>

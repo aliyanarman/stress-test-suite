@@ -83,19 +83,31 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">EV/Revenue</div><div className="text-3xl font-bold text-foreground">{results.evToRevenue.toFixed(1)}x</div></div>
             </div>
 
-            <div className="flex justify-center items-stretch gap-4 mb-8">
-              <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
-              <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
-            </div>
+              <div className="flex justify-center items-stretch gap-3 mb-6">
+                <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
+                <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
+              </div>
 
             {/* FIXED: Valuation range with percentile-based methodology */}
             <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Conservative (25th %ile)</div><div className="text-xl font-bold text-foreground">{formatCurrency(results.valuationLow, country)}</div></div>
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Market Value (50th)</div><div className="text-xl font-bold text-foreground">{formatCurrency(results.valuationMid, country)}</div></div>
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Optimistic (75th %ile)</div><div className="text-xl font-bold text-foreground">{formatCurrency(results.valuationHigh, country)}</div></div>
+              <div className="liquid-glass-box p-4">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Conservative</div>
+                <div className="text-[10px] text-muted-foreground/70 mb-2">(25th %ile)</div>
+                <div className="text-xl font-bold text-foreground">{formatCurrency(results.valuationLow, country)}</div>
+              </div>
+              <div className="liquid-glass-box p-4">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Market Value</div>
+                <div className="text-[10px] text-muted-foreground/70 mb-2">(50th %ile)</div>
+                <div className="text-xl font-bold text-foreground">{formatCurrency(results.valuationMid, country)}</div>
+              </div>
+              <div className="liquid-glass-box p-4">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Optimistic</div>
+                <div className="text-[10px] text-muted-foreground/70 mb-2">(75th %ile)</div>
+                <div className="text-xl font-bold text-foreground">{formatCurrency(results.valuationHigh, country)}</div>
+              </div>
             </div>
 
-            <div className="flex gap-5">
+            <div className="flex gap-4 items-stretch">
               <div className="market-analysis-box">
                 <div className="text-[13px] font-semibold text-foreground mb-3 tracking-wide">VALUATION ANALYSIS</div>
                 <div className="text-sm leading-relaxed text-foreground/80">{results.analysis}</div>
