@@ -4,6 +4,7 @@ import { getIndustryData } from '@/utils/marketData';
 import { formatCurrency, parseNumericInput, generateExportMemo, downloadMemo } from '@/utils/formatters';
 import CalculatorInput from './CalculatorInput';
 import RadarChart from './RadarChart';
+import AIAnalysis from './AIAnalysis';
 import CountrySelector from './CountrySelector';
 
 interface Props {
@@ -107,6 +108,13 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
               ]} />
             </div>
           </div>
+
+          <AIAnalysis
+            calculatorType="Valuation"
+            inputs={{ revenue, ebitda }}
+            results={{ valuationLow: results.valuationLow, valuationMid: results.valuationMid, valuationHigh: results.valuationHigh, margin: results.margin, evToRevenue: results.evToRevenue, qualityScore: results.qualityScore }}
+            industry={industry} country={country}
+          />
 
           <div className="flex gap-3 mt-4">
             <button className="export-btn" onClick={() => downloadMemo(generateExportMemo({

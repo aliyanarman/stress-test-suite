@@ -1,0 +1,4 @@
+project_id = "gevaouepjummymiczvte"
+
+[functions.ai-deal-analysis]
+verify_jwt = false
