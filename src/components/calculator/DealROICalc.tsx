@@ -5,6 +5,7 @@ import { formatCurrency, parseNumericInput, generateExportMemo, downloadMemo } f
 import CalculatorInput from './CalculatorInput';
 import RadarChart from './RadarChart';
 import CountrySelector from './CountrySelector';
+import AIAnalysis from './AIAnalysis';
 
 interface Props {
   industry: string;
@@ -147,6 +148,13 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
               ]} />
             </div>
           </div>
+
+          <AIAnalysis
+            calculatorType="Deal ROI"
+            inputs={{ purchasePrice, ebitda, exitYears, exitMultiple }}
+            results={{ irr: results.irr, moic: results.moic, exitValue: results.exitValue, cashReturn: results.cashReturn, paybackPeriod: results.paybackPeriod, qualityScore: results.qualityScore }}
+            industry={industry} country={country}
+          />
 
           <div className="flex gap-3 mt-4">
             <button className="export-btn" onClick={exportMemo}>Export Memo</button>

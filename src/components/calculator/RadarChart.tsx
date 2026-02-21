@@ -39,11 +39,11 @@ export default function RadarChart({ scores, qualityScore }: Props) {
   }).join(' ');
 
   return (
-    <div>
-      <div className="text-[13px] font-semibold text-foreground mb-3 text-center tracking-wide">
+    <div className="performance-chart-box">
+      <div className="text-[13px] font-semibold text-foreground mb-2 text-center tracking-wide">
         PERFORMANCE
       </div>
-      <svg width="200" height="200" viewBox="0 0 200 200" className="block mx-auto">
+      <svg width="180" height="180" viewBox="0 0 200 200" className="block mx-auto">
         <polygon points={gridPoints} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
         {points.map((p, i) => {
           const end = toXY(p.angle, radius);

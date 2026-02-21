@@ -5,6 +5,7 @@ import { formatCurrency, parseNumericInput, generateExportMemo, downloadMemo } f
 import CalculatorInput from './CalculatorInput';
 import RadarChart from './RadarChart';
 import CountrySelector from './CountrySelector';
+import AIAnalysis from './AIAnalysis';
 
 interface Props {
   industry: string;
@@ -143,6 +144,13 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
               ]} />
             </div>
           </div>
+
+          <AIAnalysis
+            calculatorType="Future Value"
+            inputs={{ currentValue, growthRate, years }}
+            results={{ futureValue: results.fv, totalGrowth: results.totalGrowth, percentGrowth: results.percentGrowth, qualityScore: results.qualityScore, annualGrowth: results.gr }}
+            industry={industry} country={country}
+          />
 
           <div className="flex gap-3 mt-4">
             <button className="export-btn" onClick={exportMemo}>Export Memo</button>
