@@ -121,17 +121,17 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Annual Growth</div><div className="text-3xl font-bold text-foreground">{results.gr.toFixed(1)}%</div><div className="text-[10px] text-muted-foreground mt-1">(Compound)</div></div>
             </div>
 
-            <div className="flex justify-center items-stretch gap-4 mb-8">
-              <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
-              <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
-            </div>
+              <div className="flex justify-center items-stretch gap-3 mb-6">
+                <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
+                <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
+              </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Average Growth</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.avgGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Industry average in {results.ind.marketName}</div></div>
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Top Performers</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.excellentGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Market leaders in {results.ind.name}</div></div>
-            </div>
+              <div className="grid grid-cols-2 gap-3 mb-5">
+                <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Average Growth</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.avgGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Industry average in {results.ind.marketName}</div></div>
+                <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Top Performers</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.excellentGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Market leaders in {results.ind.name}</div></div>
+              </div>
 
-            <div className="flex gap-5">
+            <div className="flex gap-4 items-stretch">
               <div className="market-analysis-box">
                 <div className="text-[13px] font-semibold text-foreground mb-3 tracking-wide">MARKET POSITIONING</div>
                 <div className="text-sm leading-relaxed text-foreground/80">{results.analysis}</div>

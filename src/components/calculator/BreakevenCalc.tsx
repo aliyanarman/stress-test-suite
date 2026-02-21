@@ -71,18 +71,18 @@ export default function BreakevenCalc({ industry, country }: Props) {
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Contribution/Unit</div><div className="text-3xl font-bold text-foreground">{formatCurrency(results.contribution, country)}</div></div>
             </div>
 
-            <div className="flex justify-center items-stretch gap-4 mb-8">
-              <div className={`executive-decision decision-${results.qualityScore >= 7 ? 'go' : results.qualityScore >= 4 ? 'caution' : 'pass'}`}>
-                {results.profitMargin >= 40 ? 'STRONG' : results.profitMargin >= 20 ? 'VIABLE' : 'WEAK'}
+              <div className="flex justify-center items-stretch gap-3 mb-6">
+                <div className={`executive-decision decision-${results.qualityScore >= 7 ? 'go' : results.qualityScore >= 4 ? 'caution' : 'pass'}`}>
+                  {results.profitMargin >= 40 ? 'STRONG' : results.profitMargin >= 20 ? 'VIABLE' : 'WEAK'}
+                </div>
+                <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
               </div>
-              <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
-            </div>
 
             {/* FIXED: Industry benchmark comparison for breakeven */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Your Margin</div><div className="text-2xl font-bold text-foreground mb-1">{results.profitMargin.toFixed(1)}%</div></div>
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Industry Avg</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.avgMargin}%</div><div className="text-[11px] text-muted-foreground">{results.ind.name} in {results.ind.marketName}</div></div>
-            </div>
+              <div className="grid grid-cols-2 gap-3 mb-5">
+                <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Your Margin</div><div className="text-2xl font-bold text-foreground mb-1">{results.profitMargin.toFixed(1)}%</div></div>
+                <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Industry Avg</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.avgMargin}%</div><div className="text-[11px] text-muted-foreground">{results.ind.name} in {results.ind.marketName}</div></div>
+              </div>
 
             <div className="market-analysis-box mt-6">
               <div className="text-[13px] font-semibold text-foreground mb-3 tracking-wide">ANALYSIS</div>

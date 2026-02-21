@@ -125,17 +125,17 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Payback Period</div><div className="text-3xl font-bold text-foreground">{results.paybackPeriod.toFixed(1)} yrs</div></div>
             </div>
 
-            <div className="flex justify-center items-stretch gap-4 mb-8">
-              <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
-              <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
-            </div>
+              <div className="flex justify-center items-stretch gap-3 mb-6">
+                <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
+                <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
+              </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">IRR Target</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.peIRR}%+</div><div className="text-[11px] text-muted-foreground">PE hurdle rate in {results.ind.marketName}</div></div>
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">MOIC Target</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.peMOIC}x+</div><div className="text-[11px] text-muted-foreground">Return multiple for {results.ind.marketName} buyouts</div></div>
-            </div>
+              <div className="grid grid-cols-2 gap-3 mb-5">
+                <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">IRR Target</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.peIRR}%+</div><div className="text-[11px] text-muted-foreground">PE hurdle rate in {results.ind.marketName}</div></div>
+                <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">MOIC Target</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.peMOIC}x+</div><div className="text-[11px] text-muted-foreground">Return multiple for {results.ind.marketName} buyouts</div></div>
+              </div>
 
-            <div className="flex gap-5">
+            <div className="flex gap-4 items-stretch">
               <div className="market-analysis-box">
                 <div className="text-[13px] font-semibold text-foreground mb-3 tracking-wide">DEAL ECONOMICS</div>
                 <div className="text-sm leading-relaxed text-foreground/80">{results.analysis}</div>
