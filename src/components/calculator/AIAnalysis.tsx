@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface Props {
   calculatorType: string;
@@ -6,14 +6,37 @@ interface Props {
   results: Record<string, string | number>;
   industry: string;
   country: string;
+  onAnalysisComplete?: (text: string) => void;
 }
 
-export default function AIAnalysis({ calculatorType, inputs, results, industry, country }: Props) {
+export default function AIAnalysis({ calculatorType, inputs, results, industry, country, onAnalysisComplete }: Props) {
   const [analysis, setAnalysis] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const abortRef = useRef<AbortController | null>(null);
 
-  const getAnalysis = useCallback(async () => {
+  const resultsStr = JSON.stringify(results);
+
+  // Auto-trigger when results change
+  useEffect(() => {
+    if (!results || Object.keys(results).length === 0) return;
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    const timer = setTimeout(() => {
+      fetchAnalysis(controller.signal);
+    }, 400);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calculatorType, industry, country, resultsStr]);
+
+  const fetchAnalysis = async (signal?: AbortSignal) => {
     setLoading(true);
     setError('');
     setAnalysis('');
@@ -28,6 +51,7 @@ export default function AIAnalysis({ calculatorType, inputs, results, industry, 
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({ calculatorType, inputs, results, industry, country }),
+        signal,
       });
 
       if (!resp.ok || !resp.body) {
@@ -61,20 +85,17 @@ export default function AIAnalysis({ calculatorType, inputs, results, industry, 
           } catch { /* partial */ }
         }
       }
-    } catch {
+
+      onAnalysisComplete?.(text);
+    } catch (e: any) {
+      if (e?.name === 'AbortError') return;
       setError('Failed to connect to AI.');
     }
     setLoading(false);
-  }, [calculatorType, inputs, results, industry, country]);
+  };
 
   return (
     <div className="mt-6">
-      {!analysis && !loading && (
-        <button className="ai-analysis-btn" onClick={getAnalysis} disabled={loading}>
-          <span className="ai-icon">✦</span> Get AI Analysis
-        </button>
-      )}
-
       {loading && !analysis && (
         <div className="ai-analysis-box">
           <div className="text-[13px] font-semibold text-foreground mb-3 tracking-wide flex items-center gap-2">
@@ -90,15 +111,21 @@ export default function AIAnalysis({ calculatorType, inputs, results, industry, 
             <span className="ai-icon">✦</span> AI ANALYST
           </div>
           <div className="text-sm leading-relaxed text-foreground/85">{analysis}</div>
-          <button className="text-xs text-foreground/40 hover:text-foreground/60 mt-3 transition-colors" onClick={getAnalysis}>
-            Regenerate
-          </button>
+          <div className="flex items-center justify-between mt-4">
+            <button className="text-xs text-foreground/40 hover:text-foreground/60 transition-colors" onClick={() => fetchAnalysis()}>
+              Regenerate
+            </button>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] text-foreground/25 uppercase tracking-widest mr-1">Sources</span>
+              <a href="https://www.bloomberg.com/markets" target="_blank" rel="noopener noreferrer" className="source-pill">Bloomberg</a>
+              <a href="https://pitchbook.com" target="_blank" rel="noopener noreferrer" className="source-pill">PitchBook</a>
+              <a href="https://www.spglobal.com/ratings" target="_blank" rel="noopener noreferrer" className="source-pill">S&P</a>
+            </div>
+          </div>
         </div>
       )}
 
-      {error && (
-        <div className="text-sm text-destructive mt-2">{error}</div>
-      )}
+      {error && <div className="text-sm text-destructive mt-2">{error}</div>}
     </div>
   );
 }

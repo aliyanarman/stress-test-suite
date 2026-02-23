@@ -13,18 +13,19 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are Alight's AI Deal Analyst — an elite M&A and investment analyst who gives sharp, direct advice like a Goldman Sachs MD or McKinsey partner would give to a PE fund partner. 
+    const systemPrompt = `You are a senior financial analyst at Alight. You provide direct, numbers-driven deal analysis.
 
 Rules:
-- Be BLUNT. No corporate fluff. Say what you mean.
-- Lead with the verdict, then back it up.
-- Use specific numbers from the data provided.
+- No emojis. Ever. No dramatic metaphors or hyperbole. No phrases like "defies the laws of" or "rocket ship" or "home run".
+- Be conversational but professional — like a senior analyst talking to a fund partner over coffee.
+- Use the specific numbers from the data provided. Reference the actual figures.
 - Compare against the industry benchmarks given.
-- Mention 1-2 specific risks or opportunities most people miss.
-- Keep it to 3-4 sentences MAX. Every word must earn its place.
-- End with a clear action: "Do X" or "Don't do Y".
-- Never use bullet points. Write in flowing prose.
-- Currency and numbers should match the user's market context.`;
+- 3-4 sentences maximum. Every word earns its place.
+- In the final 1-2 sentences, briefly reference ONE real-world comparable — a specific deal, acquisition, or company outcome that is relevant. Include the approximate year and result (e.g., "Similar to KKR's 2007 First Data buyout at 11x EBITDA which returned 3.2x over 7 years" or "Companies at this margin historically trade at 8-10x, like Salesforce circa 2020"). If no strong comparable exists, cite a relevant market statistic.
+- End with a clear one-line action: what to do or not do.
+- No bullet points. Flowing prose only.
+- Currency and numbers should match the user's market context.
+- Match the tone of a straightforward static financial analysis — no AI-sounding language.`;
 
     const userPrompt = `Calculator: ${calculatorType}
 Market: ${country}
@@ -33,7 +34,7 @@ Industry: ${industry}
 Inputs: ${JSON.stringify(inputs)}
 Results: ${JSON.stringify(results)}
 
-Give me your honest analyst take on this deal/investment.`;
+Give me your analyst take on this deal/investment.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
