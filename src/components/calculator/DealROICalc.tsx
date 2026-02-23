@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { calculateIRR, buildDealCashFlows, calculateMOIC, calculateQualityScore, getExecutiveDecision, SCENARIO_MULTIPLIERS, type Scenario } from '@/utils/calculations';
 import { getIndustryData } from '@/utils/marketData';
 import { formatCurrency, parseNumericInput, generateExportMemo, downloadMemo } from '@/utils/formatters';
@@ -12,9 +12,10 @@ interface Props {
   country: string;
   onCountryChange: (c: string) => void;
   onSave: (data: Record<string, string>, result: string) => void;
+  onCalculate?: () => void;
 }
 
-export default function DealROICalc({ industry, country, onCountryChange, onSave }: Props) {
+export default function DealROICalc({ industry, country, onCountryChange, onSave, onCalculate }: Props) {
   const [purchasePrice, setPurchasePrice] = useState('');
   const [ebitda, setEbitda] = useState('');
   const [exitYears, setExitYears] = useState('');
@@ -22,6 +23,8 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
   const [scenario, setScenario] = useState<Scenario>('base');
   const [baseVals, setBaseVals] = useState<{ multiple: number; ebitda: number } | null>(null);
   const [results, setResults] = useState<any>(null);
+  const [aiAnalysisText, setAiAnalysisText] = useState('');
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const calculate = (overrideMultiple?: number, overrideEbitda?: number) => {
     const pp = parseNumericInput(purchasePrice);
@@ -31,10 +34,8 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
     if (pp <= 0 || eb <= 0 || ey <= 0 || em <= 0) { alert('Please enter valid positive values'); return; }
 
     const exitValue = eb * em;
-    // FIXED: True IRR with interim cash flows
     const cashFlows = buildDealCashFlows(pp, eb, ey, em);
     const irr = calculateIRR(cashFlows);
-    // FIXED: MOIC includes interim EBITDA distributions
     const moic = calculateMOIC(pp, eb, ey, exitValue);
     const cashReturn = ((exitValue + eb * ey - pp) / pp) * 100;
     const paybackPeriod = pp / eb;
@@ -61,6 +62,12 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
     setResults({ irr, moic, exitValue, cashReturn, paybackPeriod, qualityScore, decision, analysis, ind, eb, ey });
   };
 
+  const handleCalculateClick = () => {
+    calculate();
+    onCalculate?.();
+    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+  };
+
   const switchScenario = (s: Scenario) => {
     const bm = baseVals?.multiple ?? parseNumericInput(exitMultiple);
     const be = baseVals?.ebitda ?? parseNumericInput(ebitda);
@@ -82,9 +89,11 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
   const exportMemo = () => {
     if (!results) return;
     downloadMemo(generateExportMemo({
-      type: 'Deal ROI', inputs: { 'Purchase Price': purchasePrice, EBITDA: ebitda, 'Exit Years': exitYears, 'Exit Multiple': exitMultiple + 'x' },
-      results: { 'IRR (True)': results.irr.toFixed(1) + '%', 'MOIC (incl. cash flows)': results.moic.toFixed(2) + 'x', 'Exit Value': formatCurrency(results.exitValue, country), 'Cash Return': results.cashReturn.toFixed(1) + '%' },
-      qualityScore: results.qualityScore, decision: results.decision.label, analysis: results.analysis, industry, country, scenario,
+      type: 'Deal ROI / LBO', inputs: { 'Purchase Price': purchasePrice, EBITDA: ebitda, 'Exit Years': exitYears, 'Exit Multiple': exitMultiple + 'x' },
+      results: { 'IRR (True)': results.irr.toFixed(1) + '%', 'MOIC (incl. cash flows)': results.moic.toFixed(2) + 'x', 'Exit Value': formatCurrency(results.exitValue, country), 'Cash Return': results.cashReturn.toFixed(1) + '%', 'Payback Period': results.paybackPeriod.toFixed(1) + ' years' },
+      qualityScore: results.qualityScore, decision: results.decision.label, analysis: results.analysis,
+      aiAnalysis: aiAnalysisText,
+      industry, country, scenario,
     }));
   };
 
@@ -96,11 +105,11 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
       <CalculatorInput label="When do you plan to sell? (years)" value={exitYears} onChange={setExitYears} suffix="years" placeholder="5" />
       <CalculatorInput label="What multiple can you sell at?" value={exitMultiple} onChange={setExitMultiple} suffix="x EBITDA" placeholder="12" />
       <div className="flex justify-center mt-8">
-        <button className="glass-btn" onClick={() => calculate()}>Calculate Returns</button>
+        <button className="glass-btn" onClick={handleCalculateClick}>Calculate Returns</button>
       </div>
 
       {results && (
-        <div className="mt-12 pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
+        <div ref={resultsRef} className="mt-12 pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
           <div className="flex gap-3 mb-6 flex-wrap items-center">
             {(['base', 'bull', 'bear'] as Scenario[]).map(s => (
               <button key={s} className={`scenario-btn ${scenario === s ? 'active' : ''}`} onClick={() => switchScenario(s)}>{SCENARIO_MULTIPLIERS[s].label}</button>
@@ -125,15 +134,15 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Payback Period</div><div className="text-3xl font-bold text-foreground">{results.paybackPeriod.toFixed(1)} yrs</div></div>
             </div>
 
-              <div className="flex justify-center items-stretch gap-3 mb-6">
-                <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
-                <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
-              </div>
+            <div className="flex justify-center items-stretch gap-3 mb-6">
+              <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
+              <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-5">
-                <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">IRR Target</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.peIRR}%+</div><div className="text-[11px] text-muted-foreground">PE hurdle rate in {results.ind.marketName}</div></div>
-                <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">MOIC Target</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.peMOIC}x+</div><div className="text-[11px] text-muted-foreground">Return multiple for {results.ind.marketName} buyouts</div></div>
-              </div>
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">IRR Target</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.peIRR}%+</div><div className="text-[11px] text-muted-foreground">PE hurdle rate in {results.ind.marketName}</div></div>
+              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">MOIC Target</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.peMOIC}x+</div><div className="text-[11px] text-muted-foreground">Return multiple for {results.ind.marketName} buyouts</div></div>
+            </div>
 
             <div className="flex gap-4 items-stretch">
               <div className="market-analysis-box">
@@ -154,6 +163,7 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
             inputs={{ purchasePrice, ebitda, exitYears, exitMultiple }}
             results={{ irr: results.irr, moic: results.moic, exitValue: results.exitValue, cashReturn: results.cashReturn, paybackPeriod: results.paybackPeriod, qualityScore: results.qualityScore }}
             industry={industry} country={country}
+            onAnalysisComplete={setAiAnalysisText}
           />
 
           <div className="flex gap-3 mt-4">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { INDUSTRIES } from '@/utils/marketData';
 import FutureValueCalc from '@/components/calculator/FutureValueCalc';
 import DealROICalc from '@/components/calculator/DealROICalc';
@@ -18,12 +18,14 @@ const CALC_TABS = [
 export default function Index() {
   const [activeCalc, setActiveCalc] = useState('futureValue');
   const [industry, setIndustry] = useState('real-estate');
-  // FIXED: Single source of truth for country (was split between auto-detect and per-calc selectors)
   const [country, setCountry] = useState('US');
   const [savedDeals, setSavedDeals] = useState<SavedDeal[]>(() => {
     try { return JSON.parse(localStorage.getItem('alight_saved_deals') || '[]'); } catch { return []; }
   });
   const [showSavedDeals, setShowSavedDeals] = useState(false);
+  const [ribbonCollapsed, setRibbonCollapsed] = useState(false);
+  const [footerVisible, setFooterVisible] = useState(false);
+  const footerRef = useRef<HTMLDivElement>(null);
 
   // Auto-detect country on mount
   useEffect(() => {
@@ -35,6 +37,27 @@ export default function Index() {
         else if (code === 'GB') setCountry('UK');
       })
       .catch(() => {});
+  }, []);
+
+  // Footer blur-in on scroll
+  useEffect(() => {
+    const el = footerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setFooterVisible(true);
+    }, { threshold: 0.1 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  });
+
+  // Reset on calc change
+  useEffect(() => {
+    setFooterVisible(false);
+    setRibbonCollapsed(false);
+  }, [activeCalc]);
+
+  const handleCalculate = useCallback(() => {
+    setRibbonCollapsed(true);
   }, []);
 
   const showNotification = (msg: string) => {
@@ -84,7 +107,7 @@ export default function Index() {
   }, []);
 
   return (
-    <div className="min-h-screen px-5 pt-10 pb-40">
+    <div className="min-h-screen px-5 pt-10 pb-24">
       <div className="max-w-[800px] mx-auto">
         {/* Header */}
         <div className="mb-16 relative">
@@ -93,7 +116,6 @@ export default function Index() {
           </h1>
           <p className="text-lg text-foreground/90">Your pocket financial analyst</p>
 
-          {/* FIXED: Industry selector hidden for breakeven (kept behavior), visible for all others */}
           <div className={`absolute top-0 right-0 transition-all duration-300 ${activeCalc === 'breakeven' ? 'opacity-0 pointer-events-none -translate-y-5' : 'opacity-100'}`}>
             <select className="glass-select" value={industry} onChange={e => setIndustry(e.target.value)}>
               {INDUSTRIES.map(i => <option key={i.value} value={i.value}>{i.label}</option>)}
@@ -103,36 +125,49 @@ export default function Index() {
 
         {/* Active Calculator */}
         <div key={activeCalc} style={{ animation: 'fadeIn 0.3s ease' }}>
-          {activeCalc === 'futureValue' && <FutureValueCalc industry={industry} country={country} onCountryChange={setCountry} onSave={(d, r) => saveDeal('futureValue', d, r)} />}
-          {activeCalc === 'dealROI' && <DealROICalc industry={industry} country={country} onCountryChange={setCountry} onSave={(d, r) => saveDeal('dealROI', d, r)} />}
-          {activeCalc === 'breakeven' && <BreakevenCalc industry={industry} country={country} />}
-          {activeCalc === 'valuation' && <ValuationCalc industry={industry} country={country} onCountryChange={setCountry} onSave={(d, r) => saveDeal('valuation', d, r)} />}
-          {activeCalc === 'payback' && <PaybackCalc industry={industry} country={country} onCountryChange={setCountry} />}
+          {activeCalc === 'futureValue' && <FutureValueCalc industry={industry} country={country} onCountryChange={setCountry} onSave={(d, r) => saveDeal('futureValue', d, r)} onCalculate={handleCalculate} />}
+          {activeCalc === 'dealROI' && <DealROICalc industry={industry} country={country} onCountryChange={setCountry} onSave={(d, r) => saveDeal('dealROI', d, r)} onCalculate={handleCalculate} />}
+          {activeCalc === 'breakeven' && <BreakevenCalc industry={industry} country={country} onCalculate={handleCalculate} />}
+          {activeCalc === 'valuation' && <ValuationCalc industry={industry} country={country} onCountryChange={setCountry} onSave={(d, r) => saveDeal('valuation', d, r)} onCalculate={handleCalculate} />}
+          {activeCalc === 'payback' && <PaybackCalc industry={industry} country={country} onCountryChange={setCountry} onCalculate={handleCalculate} />}
         </div>
-      </div>
 
-      {/* Bottom Navigation — FIXED: Single panel, no duplicates */}
-      <div className="fixed bottom-0 left-0 right-0 flex flex-col items-center gap-4 pb-8 z-50">
-        <div className="bottom-nav">
-          {CALC_TABS.map(tab => (
-            <button key={tab.id} className={`nav-btn ${activeCalc === tab.id ? 'active' : ''}`} onClick={() => setActiveCalc(tab.id)}>
-              {tab.label}
+        {/* Inline footer — blur-in on scroll */}
+        <div
+          ref={footerRef}
+          className={`mt-20 mb-16 text-center transition-all duration-700 ${footerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+          style={{ filter: footerVisible ? 'blur(0px)' : 'blur(8px)' }}
+        >
+          <div className="flex gap-4 items-center justify-center mb-3 flex-wrap">
+            <p className="text-[15px] text-foreground/50">Confidential Preview - Not for distribution</p>
+            <button onClick={() => setShowSavedDeals(true)} className="text-xs text-foreground/60 hover:text-foreground transition-colors cursor-pointer underline">
+              Saved Deals ({savedDeals.length})
             </button>
-          ))}
+            <a href="https://github.com/aliyanarman/Pocket-Financial-Analyst/blob/main/Alight_Technical_Documentation.pdf" target="_blank" rel="noopener noreferrer" className="text-xs text-foreground/60 hover:text-foreground transition-colors cursor-pointer underline">
+              Guide
+            </a>
+          </div>
+          <p className="text-xs text-foreground/40">© 2026 Aliyan Arman. All rights reserved.</p>
         </div>
-        <div className="flex gap-4 items-center">
-          <p className="text-[15px] text-foreground">Confidential Preview - Not for distribution</p>
-          <button onClick={() => setShowSavedDeals(true)} className="text-xs text-foreground/60 hover:text-foreground transition-colors cursor-pointer underline">
-            Saved Deals ({savedDeals.length})
-          </button>
-          <a href="https://github.com/aliyanarman/Pocket-Financial-Analyst/blob/main/Alight_Technical_Documentation.pdf" target="_blank" rel="noopener noreferrer" className="text-xs text-foreground/60 hover:text-foreground transition-colors cursor-pointer underline">
-            Guide
-          </a>
-        </div>
-        <p className="text-xs text-foreground/60">© 2026 Aliyan Arman. All rights reserved.</p>
       </div>
 
-      {/* FIXED: Single saved deals panel (was duplicated) */}
+      {/* Fixed bottom — calculator ribbon only */}
+      <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-6 z-50">
+        {ribbonCollapsed ? (
+          <div className="home-indicator" onClick={() => setRibbonCollapsed(false)}>
+            <div className="home-indicator-pill" />
+          </div>
+        ) : (
+          <div className="bottom-nav" style={{ animation: 'scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+            {CALC_TABS.map(tab => (
+              <button key={tab.id} className={`nav-btn ${activeCalc === tab.id ? 'active' : ''}`} onClick={() => setActiveCalc(tab.id)}>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       <SavedDealsPanel deals={savedDeals} isOpen={showSavedDeals} onClose={() => setShowSavedDeals(false)} onLoad={loadDeal} onDelete={deleteDeal} />
     </div>
   );

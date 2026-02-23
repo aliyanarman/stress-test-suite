@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { calculateFutureValue, calculateQualityScore, getExecutiveDecision, SCENARIO_MULTIPLIERS, type Scenario } from '@/utils/calculations';
 import { getIndustryData } from '@/utils/marketData';
 import { formatCurrency, parseNumericInput, generateExportMemo, downloadMemo } from '@/utils/formatters';
@@ -12,15 +12,18 @@ interface Props {
   country: string;
   onCountryChange: (c: string) => void;
   onSave: (data: Record<string, string>, result: string) => void;
+  onCalculate?: () => void;
 }
 
-export default function FutureValueCalc({ industry, country, onCountryChange, onSave }: Props) {
+export default function FutureValueCalc({ industry, country, onCountryChange, onSave, onCalculate }: Props) {
   const [currentValue, setCurrentValue] = useState('');
   const [growthRate, setGrowthRate] = useState('');
   const [years, setYears] = useState('');
   const [scenario, setScenario] = useState<Scenario>('base');
   const [baseGrowth, setBaseGrowth] = useState<number | null>(null);
   const [results, setResults] = useState<any>(null);
+  const [aiAnalysisText, setAiAnalysisText] = useState('');
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const calculate = (overrideGrowth?: number) => {
     const cv = parseNumericInput(currentValue);
@@ -56,6 +59,13 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
     setResults({ fv, totalGrowth, percentGrowth, qualityScore, decision, analysis, ind, gr, yr });
   };
 
+  const handleCalculateClick = () => {
+    if (!baseGrowth) setBaseGrowth(null);
+    calculate();
+    onCalculate?.();
+    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+  };
+
   const switchScenario = (s: Scenario) => {
     const base = baseGrowth ?? parseNumericInput(growthRate);
     if (baseGrowth === null) setBaseGrowth(base);
@@ -78,6 +88,7 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
       inputs: { 'Current Value': formatCurrency(parseNumericInput(currentValue), country), 'Growth Rate': growthRate + '%', 'Years': years },
       results: { 'Future Value': formatCurrency(results.fv, country), 'Total Growth': formatCurrency(results.totalGrowth, country), 'Percent Growth': results.percentGrowth.toFixed(1) + '%' },
       qualityScore: results.qualityScore, decision: results.decision.label, analysis: results.analysis,
+      aiAnalysis: aiAnalysisText,
       industry, country, scenario,
     });
     downloadMemo(memo);
@@ -90,11 +101,11 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
       <CalculatorInput label="What's the yearly growth rate?" value={growthRate} onChange={setGrowthRate} suffix="%" placeholder="5" />
       <CalculatorInput label="How many years from now?" value={years} onChange={setYears} suffix="years" placeholder="10" />
       <div className="flex justify-center mt-8">
-        <button className="glass-btn" onClick={() => { if (!baseGrowth) setBaseGrowth(null); calculate(); }}>Calculate Future Value</button>
+        <button className="glass-btn" onClick={handleCalculateClick}>Calculate Future Value</button>
       </div>
 
       {results && (
-        <div className="mt-12 pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
+        <div ref={resultsRef} className="mt-12 pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
           <div className="flex gap-3 mb-6 flex-wrap items-center">
             {(['base', 'bull', 'bear'] as Scenario[]).map(s => (
               <button key={s} className={`scenario-btn ${scenario === s ? 'active' : ''}`} onClick={() => switchScenario(s)}>
@@ -121,15 +132,15 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Annual Growth</div><div className="text-3xl font-bold text-foreground">{results.gr.toFixed(1)}%</div><div className="text-[10px] text-muted-foreground mt-1">(Compound)</div></div>
             </div>
 
-              <div className="flex justify-center items-stretch gap-3 mb-6">
-                <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
-                <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
-              </div>
+            <div className="flex justify-center items-stretch gap-3 mb-6">
+              <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
+              <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-5">
-                <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Average Growth</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.avgGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Industry average in {results.ind.marketName}</div></div>
-                <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Top Performers</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.excellentGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Market leaders in {results.ind.name}</div></div>
-              </div>
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Average Growth</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.avgGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Industry average in {results.ind.marketName}</div></div>
+              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Top Performers</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.excellentGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Market leaders in {results.ind.name}</div></div>
+            </div>
 
             <div className="flex gap-4 items-stretch">
               <div className="market-analysis-box">
@@ -150,6 +161,7 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
             inputs={{ currentValue, growthRate, years }}
             results={{ futureValue: results.fv, totalGrowth: results.totalGrowth, percentGrowth: results.percentGrowth, qualityScore: results.qualityScore, annualGrowth: results.gr }}
             industry={industry} country={country}
+            onAnalysisComplete={setAiAnalysisText}
           />
 
           <div className="flex gap-3 mt-4">
