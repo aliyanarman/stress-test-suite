@@ -256,18 +256,26 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
+  .badge-row {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 24px;
+  }
+
   .executive-decision {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 14px 28px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+    padding: 12px 28px;
+    border-radius: 50px 0 0 50px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
-    min-height: 50px;
-    min-width: 180px;
+    min-height: 52px;
+    min-width: 160px;
   }
 
   .decision-go {
@@ -292,13 +300,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08));
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
-    padding: 14px 24px;
-    min-height: 50px;
-    min-width: 100px;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-left: none;
+    border-radius: 0 50px 50px 0;
+    padding: 12px 24px;
+    min-height: 52px;
+    min-width: 90px;
   }
 
   .status-excellent {

@@ -17,7 +17,6 @@ export default function AIAnalysis({ calculatorType, inputs, results, industry, 
 
   const resultsStr = JSON.stringify(results);
 
-  // Auto-trigger when results change
   useEffect(() => {
     if (!results || Object.keys(results).length === 0) return;
 
@@ -94,38 +93,34 @@ export default function AIAnalysis({ calculatorType, inputs, results, industry, 
     setLoading(false);
   };
 
-  return (
-    <div className="mt-6">
-      {loading && !analysis && (
-        <div className="ai-analysis-box">
-          <div className="text-[13px] font-semibold text-foreground mb-3 tracking-wide flex items-center gap-2">
-            <span className="ai-icon animate-pulse">✦</span> AI ANALYST
-          </div>
-          <div className="text-sm text-foreground/60 animate-pulse">Analyzing your deal...</div>
-        </div>
-      )}
+  if (loading && !analysis) {
+    return (
+      <div className="text-sm text-foreground/60 animate-pulse">Analyzing your numbers...</div>
+    );
+  }
 
-      {analysis && (
-        <div className="ai-analysis-box">
-          <div className="text-[13px] font-semibold text-foreground mb-3 tracking-wide flex items-center gap-2">
-            <span className="ai-icon">✦</span> AI ANALYST
-          </div>
-          <div className="text-sm leading-relaxed text-foreground/85">{analysis}</div>
-          <div className="flex items-center justify-between mt-4">
-            <button className="text-xs text-foreground/40 hover:text-foreground/60 transition-colors" onClick={() => fetchAnalysis()}>
-              Regenerate
-            </button>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[9px] text-foreground/25 uppercase tracking-widest mr-1">Sources</span>
-              <a href="https://www.bloomberg.com/markets" target="_blank" rel="noopener noreferrer" className="source-pill">Bloomberg</a>
-              <a href="https://pitchbook.com" target="_blank" rel="noopener noreferrer" className="source-pill">PitchBook</a>
-              <a href="https://www.spglobal.com/ratings" target="_blank" rel="noopener noreferrer" className="source-pill">S&P</a>
-            </div>
+  if (error) {
+    return <div className="text-sm text-destructive">{error}</div>;
+  }
+
+  if (analysis) {
+    return (
+      <>
+        <div className="text-sm leading-relaxed text-foreground/80">{analysis}</div>
+        <div className="flex items-center justify-between mt-4">
+          <button className="text-xs text-foreground/40 hover:text-foreground/60 transition-colors" onClick={() => fetchAnalysis()}>
+            Regenerate
+          </button>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[9px] text-foreground/25 uppercase tracking-widest mr-1">Sources</span>
+            <a href="https://www.bloomberg.com/markets" target="_blank" rel="noopener noreferrer" className="source-pill">Bloomberg</a>
+            <a href="https://pitchbook.com" target="_blank" rel="noopener noreferrer" className="source-pill">PitchBook</a>
+            <a href="https://www.spglobal.com/ratings" target="_blank" rel="noopener noreferrer" className="source-pill">S&P</a>
           </div>
         </div>
-      )}
+      </>
+    );
+  }
 
-      {error && <div className="text-sm text-destructive mt-2">{error}</div>}
-    </div>
-  );
+  return null;
 }

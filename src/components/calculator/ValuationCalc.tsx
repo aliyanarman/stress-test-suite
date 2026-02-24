@@ -42,18 +42,8 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
       timeEfficiency: margin >= ind.avgMargin ? 0.7 : 0.4,
     });
     const decision = getExecutiveDecision(qualityScore, 'valuation');
-    const vsAvg = margin - ind.avgMargin;
 
-    let analysis = '';
-    if (margin >= ind.avgMargin + 5) {
-      analysis = `Your ${margin.toFixed(1)}% profit margin is well above average for ${ind.marketName} ${ind.name} (${ind.avgMargin}%). Buyers will pay a premium — around ${formatCurrency(valuationMid, country)} or more. You're running a tight ship.`;
-    } else if (margin >= ind.avgMargin) {
-      analysis = `${margin.toFixed(1)}% profit margin is about average for ${ind.marketName} ${ind.name} (${ind.avgMargin}%). Worth around ${formatCurrency(valuationMid, country)}. ${vsAvg > 0 ? 'Slightly better than average' : 'Right at average'} — improve margins and you'll get more when you sell.`;
-    } else {
-      analysis = `Your ${margin.toFixed(1)}% profit margin is below average for ${ind.marketName} ${ind.name} (they do ${ind.avgMargin}%). Worth about ${formatCurrency(valuationMid, country)}, but buyers will want a discount. Fix your margins before selling.`;
-    }
-
-    setResults({ valuationLow, valuationMid, valuationHigh, margin, evToRevenue, qualityScore, decision, analysis, ind });
+    setResults({ valuationLow, valuationMid, valuationHigh, margin, evToRevenue, qualityScore, decision, ind });
   };
 
   const handleCalculateClick = () => {
@@ -67,7 +57,8 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
     downloadMemo(generateExportMemo({
       type: 'Valuation', inputs: { Revenue: revenue, EBITDA: ebitda },
       results: { 'Conservative (25th %ile)': formatCurrency(results.valuationLow, country), 'Market Value (50th %ile)': formatCurrency(results.valuationMid, country), 'Optimistic (75th %ile)': formatCurrency(results.valuationHigh, country), 'EBITDA Margin': results.margin.toFixed(1) + '%', 'EV/Revenue': results.evToRevenue.toFixed(1) + 'x' },
-      qualityScore: results.qualityScore, decision: results.decision.label, analysis: results.analysis,
+      qualityScore: results.qualityScore, decision: results.decision.label,
+      analysis: aiAnalysisText,
       aiAnalysis: aiAnalysisText,
       industry, country, scenario: 'base',
     }));
@@ -102,7 +93,7 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">EV/Revenue</div><div className="text-3xl font-bold text-foreground">{results.evToRevenue.toFixed(1)}x</div></div>
             </div>
 
-            <div className="flex justify-center items-stretch gap-3 mb-6">
+            <div className="badge-row">
               <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
               <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
             </div>
@@ -128,7 +119,13 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
             <div className="flex gap-4 items-stretch">
               <div className="market-analysis-box">
                 <div className="text-[13px] font-semibold text-foreground mb-3 tracking-wide">VALUATION ANALYSIS</div>
-                <div className="text-sm leading-relaxed text-foreground/80">{results.analysis}</div>
+                <AIAnalysis
+                  calculatorType="Valuation"
+                  inputs={{ revenue, ebitda }}
+                  results={{ valuationLow: results.valuationLow, valuationMid: results.valuationMid, valuationHigh: results.valuationHigh, margin: results.margin, evToRevenue: results.evToRevenue, qualityScore: results.qualityScore }}
+                  industry={industry} country={country}
+                  onAnalysisComplete={setAiAnalysisText}
+                />
               </div>
               <RadarChart qualityScore={results.qualityScore} scores={[
                 { label: 'Quality', value: Math.min(100, (results.margin / 35) * 100) },
@@ -138,14 +135,6 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
               ]} />
             </div>
           </div>
-
-          <AIAnalysis
-            calculatorType="Valuation"
-            inputs={{ revenue, ebitda }}
-            results={{ valuationLow: results.valuationLow, valuationMid: results.valuationMid, valuationHigh: results.valuationHigh, margin: results.margin, evToRevenue: results.evToRevenue, qualityScore: results.qualityScore }}
-            industry={industry} country={country}
-            onAnalysisComplete={setAiAnalysisText}
-          />
 
           <div className="flex gap-3 mt-4">
             <button className="export-btn" onClick={exportMemo}>Export Memo</button>
