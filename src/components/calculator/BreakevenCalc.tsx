@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { calculateBreakeven, calculateQualityScore, getExecutiveDecision } from '@/utils/calculations';
+import { calculateBreakeven, calculateQualityScore } from '@/utils/calculations';
 import { getIndustryData } from '@/utils/marketData';
 import { formatCurrency, parseNumericInput, generateExportMemo, downloadMemo } from '@/utils/formatters';
 import CalculatorInput from './CalculatorInput';
@@ -35,18 +35,7 @@ export default function BreakevenCalc({ industry, country, onCalculate }: Props)
       timeEfficiency: r.breakevenUnits <= 1000 ? 0.8 : r.breakevenUnits <= 5000 ? 0.5 : 0.2,
     });
 
-    let analysis = '';
-    if (r.profitMargin >= 50) {
-      analysis = `Your ${r.profitMargin.toFixed(0)}% margin is healthy. Each unit sold contributes ${formatCurrency(r.contribution, country)} toward covering your ${formatCurrency(fc, country)} monthly overhead. At ${r.breakevenUnits.toLocaleString()} units, you break even. Every unit beyond that is ${r.profitMargin.toFixed(0)}% profit. For ${ind.name} in ${ind.marketName}, the average margin is ${ind.avgMargin}% — you're well above that.`;
-    } else if (r.profitMargin >= 30) {
-      analysis = `With a ${r.profitMargin.toFixed(0)}% margin, you need ${r.breakevenUnits.toLocaleString()} monthly sales to cover ${formatCurrency(fc, country)} in fixed costs. Each unit adds ${formatCurrency(r.contribution, country)} to the bottom line. ${ind.name} in ${ind.marketName} averages ${ind.avgMargin}% margins — ${r.profitMargin >= ind.avgMargin ? 'you\'re above par' : 'you\'re slightly below industry average'}.`;
-    } else if (r.profitMargin >= 15) {
-      analysis = `Your ${r.profitMargin.toFixed(0)}% margin means tight unit economics. Breaking even at ${r.breakevenUnits.toLocaleString()} units requires consistent volume. The ${formatCurrency(r.contribution, country)} per-unit contribution leaves little room for discounting. Industry average in ${ind.marketName} ${ind.name} is ${ind.avgMargin}%.`;
-    } else {
-      analysis = `At ${r.profitMargin.toFixed(0)}%, margins are razor-thin. You need ${r.breakevenUnits.toLocaleString()} units just to cover ${formatCurrency(fc, country)} overhead. With only ${formatCurrency(r.contribution, country)} contribution per unit, small cost increases are dangerous. ${ind.name} in ${ind.marketName} typically runs ${ind.avgMargin}% margins. This model needs restructuring.`;
-    }
-
-    setResults({ ...r, qualityScore, analysis, ind });
+    setResults({ ...r, qualityScore, ind });
   };
 
   const handleCalculateClick = () => {
@@ -62,7 +51,7 @@ export default function BreakevenCalc({ industry, country, onCalculate }: Props)
       inputs: { 'Fixed Costs (Monthly)': formatCurrency(parseNumericInput(fixedCosts), country), 'Price Per Unit': formatCurrency(parseNumericInput(pricePerUnit), country), 'Cost Per Unit': formatCurrency(parseNumericInput(costPerUnit), country) },
       results: { 'Breakeven Units': results.breakevenUnits.toLocaleString(), 'Breakeven Revenue': formatCurrency(results.breakevenRevenue, country), 'Profit Margin': results.profitMargin.toFixed(1) + '%', 'Contribution/Unit': formatCurrency(results.contribution, country) },
       qualityScore: results.qualityScore, decision: results.profitMargin >= 40 ? 'STRONG' : results.profitMargin >= 20 ? 'VIABLE' : 'WEAK',
-      analysis: results.analysis, aiAnalysis: aiAnalysisText,
+      analysis: aiAnalysisText, aiAnalysis: aiAnalysisText,
       industry, country, scenario: 'base',
     }));
   };
@@ -93,7 +82,7 @@ export default function BreakevenCalc({ industry, country, onCalculate }: Props)
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Contribution/Unit</div><div className="text-3xl font-bold text-foreground">{formatCurrency(results.contribution, country)}</div></div>
             </div>
 
-            <div className="flex justify-center items-stretch gap-3 mb-6">
+            <div className="badge-row">
               <div className={`executive-decision decision-${results.qualityScore >= 7 ? 'go' : results.qualityScore >= 4 ? 'caution' : 'pass'}`}>
                 {results.profitMargin >= 40 ? 'STRONG' : results.profitMargin >= 20 ? 'VIABLE' : 'WEAK'}
               </div>
@@ -107,17 +96,15 @@ export default function BreakevenCalc({ industry, country, onCalculate }: Props)
 
             <div className="market-analysis-box mt-6">
               <div className="text-[13px] font-semibold text-foreground mb-3 tracking-wide">ANALYSIS</div>
-              <div className="text-sm leading-relaxed text-foreground/80">{results.analysis}</div>
+              <AIAnalysis
+                calculatorType="Breakeven"
+                inputs={{ fixedCosts, pricePerUnit, costPerUnit }}
+                results={{ breakevenUnits: results.breakevenUnits, breakevenRevenue: results.breakevenRevenue, profitMargin: results.profitMargin, contribution: results.contribution, qualityScore: results.qualityScore }}
+                industry={industry} country={country}
+                onAnalysisComplete={setAiAnalysisText}
+              />
             </div>
           </div>
-
-          <AIAnalysis
-            calculatorType="Breakeven"
-            inputs={{ fixedCosts, pricePerUnit, costPerUnit }}
-            results={{ breakevenUnits: results.breakevenUnits, breakevenRevenue: results.breakevenRevenue, profitMargin: results.profitMargin, contribution: results.contribution, qualityScore: results.qualityScore }}
-            industry={industry} country={country}
-            onAnalysisComplete={setAiAnalysisText}
-          />
 
           <div className="flex gap-3 mt-4">
             <button className="export-btn" onClick={exportMemo}>Export Memo</button>

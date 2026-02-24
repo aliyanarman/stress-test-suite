@@ -48,18 +48,7 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
     });
     const decision = getExecutiveDecision(qualityScore, 'deal');
 
-    let analysis = '';
-    if (irr >= ind.peIRR + 5 && moic >= ind.peMOIC + 0.5) {
-      analysis = `This is a great deal. Every year you make ${irr.toFixed(1)}% on your money (true IRR including ${formatCurrency(eb, country)}/yr cash flow). Put in ${formatCurrency(100, country)}, walk away with ${formatCurrency(moic * 100, country)} total. Most people in ${ind.marketName} want ${ind.peIRR}%, so you're beating the bar. ${ind.context}`;
-    } else if (irr >= ind.peIRR) {
-      analysis = `This deal is solid. You make ${irr.toFixed(1)}% per year (IRR), hitting the ${ind.peIRR}% target. Total return of ${moic.toFixed(1)}x your money including annual cash flows. Takes about ${paybackPeriod.toFixed(1)} years to break even on operations alone. ${ind.context}`;
-    } else if (irr >= ind.peIRR - 5) {
-      analysis = `This deal is weak. You only make ${irr.toFixed(1)}% per year when you should be making at least ${ind.peIRR}%. Total return is ${moic.toFixed(1)}x. Takes ${paybackPeriod.toFixed(1)} years to break even. ${ind.context}`;
-    } else {
-      analysis = `Skip this deal. You're only making ${irr.toFixed(1)}% per year when ${ind.peIRR}% is the minimum. Total return of just ${moic.toFixed(1)}x doesn't justify the risk. ${ind.context}`;
-    }
-
-    setResults({ irr, moic, exitValue, cashReturn, paybackPeriod, qualityScore, decision, analysis, ind, eb, ey });
+    setResults({ irr, moic, exitValue, cashReturn, paybackPeriod, qualityScore, decision, ind, eb, ey });
   };
 
   const handleCalculateClick = () => {
@@ -91,7 +80,8 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
     downloadMemo(generateExportMemo({
       type: 'Deal ROI / LBO', inputs: { 'Purchase Price': purchasePrice, EBITDA: ebitda, 'Exit Years': exitYears, 'Exit Multiple': exitMultiple + 'x' },
       results: { 'IRR (True)': results.irr.toFixed(1) + '%', 'MOIC (incl. cash flows)': results.moic.toFixed(2) + 'x', 'Exit Value': formatCurrency(results.exitValue, country), 'Cash Return': results.cashReturn.toFixed(1) + '%', 'Payback Period': results.paybackPeriod.toFixed(1) + ' years' },
-      qualityScore: results.qualityScore, decision: results.decision.label, analysis: results.analysis,
+      qualityScore: results.qualityScore, decision: results.decision.label,
+      analysis: aiAnalysisText,
       aiAnalysis: aiAnalysisText,
       industry, country, scenario,
     }));
@@ -134,7 +124,7 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Payback Period</div><div className="text-3xl font-bold text-foreground">{results.paybackPeriod.toFixed(1)} yrs</div></div>
             </div>
 
-            <div className="flex justify-center items-stretch gap-3 mb-6">
+            <div className="badge-row">
               <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
               <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
             </div>
@@ -147,7 +137,13 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
             <div className="flex gap-4 items-stretch">
               <div className="market-analysis-box">
                 <div className="text-[13px] font-semibold text-foreground mb-3 tracking-wide">DEAL ECONOMICS</div>
-                <div className="text-sm leading-relaxed text-foreground/80">{results.analysis}</div>
+                <AIAnalysis
+                  calculatorType="Deal ROI"
+                  inputs={{ purchasePrice, ebitda, exitYears, exitMultiple }}
+                  results={{ irr: results.irr, moic: results.moic, exitValue: results.exitValue, cashReturn: results.cashReturn, paybackPeriod: results.paybackPeriod, qualityScore: results.qualityScore }}
+                  industry={industry} country={country}
+                  onAnalysisComplete={setAiAnalysisText}
+                />
               </div>
               <RadarChart qualityScore={results.qualityScore} scores={[
                 { label: 'Quality', value: Math.min(100, (results.irr / 30) * 100) },
@@ -157,14 +153,6 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
               ]} />
             </div>
           </div>
-
-          <AIAnalysis
-            calculatorType="Deal ROI"
-            inputs={{ purchasePrice, ebitda, exitYears, exitMultiple }}
-            results={{ irr: results.irr, moic: results.moic, exitValue: results.exitValue, cashReturn: results.cashReturn, paybackPeriod: results.paybackPeriod, qualityScore: results.qualityScore }}
-            industry={industry} country={country}
-            onAnalysisComplete={setAiAnalysisText}
-          />
 
           <div className="flex gap-3 mt-4">
             <button className="export-btn" onClick={exportMemo}>Export Memo</button>
