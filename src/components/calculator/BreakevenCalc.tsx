@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { calculateBreakeven, calculateQualityScore } from '@/utils/calculations';
 import { getIndustryData } from '@/utils/marketData';
-import { formatCurrency, parseNumericInput, generateExportMemo, downloadMemo } from '@/utils/formatters';
+import { formatCurrency, parseNumericInput, downloadMemoPDF } from '@/utils/formatters';
 import CalculatorInput from './CalculatorInput';
 import AIAnalysis from './AIAnalysis';
 
@@ -46,14 +46,16 @@ export default function BreakevenCalc({ industry, country, onCalculate }: Props)
 
   const exportMemo = () => {
     if (!results) return;
-    downloadMemo(generateExportMemo({
+    downloadMemoPDF({
       type: 'Breakeven Analysis',
       inputs: { 'Fixed Costs (Monthly)': formatCurrency(parseNumericInput(fixedCosts), country), 'Price Per Unit': formatCurrency(parseNumericInput(pricePerUnit), country), 'Cost Per Unit': formatCurrency(parseNumericInput(costPerUnit), country) },
       results: { 'Breakeven Units': results.breakevenUnits.toLocaleString(), 'Breakeven Revenue': formatCurrency(results.breakevenRevenue, country), 'Profit Margin': results.profitMargin.toFixed(1) + '%', 'Contribution/Unit': formatCurrency(results.contribution, country) },
       qualityScore: results.qualityScore, decision: results.profitMargin >= 40 ? 'STRONG' : results.profitMargin >= 20 ? 'VIABLE' : 'WEAK',
-      analysis: aiAnalysisText, aiAnalysis: aiAnalysisText,
+      analysis: aiAnalysisText,
       industry, country, scenario: 'base',
-    }));
+      calculatorInputs: { fixedCosts, pricePerUnit, costPerUnit },
+      calculatorResults: { breakevenUnits: results.breakevenUnits, breakevenRevenue: results.breakevenRevenue, profitMargin: results.profitMargin, contribution: results.contribution, qualityScore: results.qualityScore },
+    });
   };
 
   return (

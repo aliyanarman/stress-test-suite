@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { calculateIRR, buildDealCashFlows, calculateMOIC, calculateQualityScore, getExecutiveDecision, SCENARIO_MULTIPLIERS, type Scenario } from '@/utils/calculations';
 import { getIndustryData } from '@/utils/marketData';
-import { formatCurrency, parseNumericInput, generateExportMemo, downloadMemo } from '@/utils/formatters';
+import { formatCurrency, parseNumericInput, downloadMemoPDF } from '@/utils/formatters';
 import CalculatorInput from './CalculatorInput';
 import RadarChart from './RadarChart';
 import CountrySelector from './CountrySelector';
@@ -77,14 +77,16 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
 
   const exportMemo = () => {
     if (!results) return;
-    downloadMemo(generateExportMemo({
-      type: 'Deal ROI / LBO', inputs: { 'Purchase Price': purchasePrice, EBITDA: ebitda, 'Exit Years': exitYears, 'Exit Multiple': exitMultiple + 'x' },
+    downloadMemoPDF({
+      type: 'Deal ROI / LBO',
+      inputs: { 'Purchase Price': purchasePrice, EBITDA: ebitda, 'Exit Years': exitYears, 'Exit Multiple': exitMultiple + 'x' },
       results: { 'IRR (True)': results.irr.toFixed(1) + '%', 'MOIC (incl. cash flows)': results.moic.toFixed(2) + 'x', 'Exit Value': formatCurrency(results.exitValue, country), 'Cash Return': results.cashReturn.toFixed(1) + '%', 'Payback Period': results.paybackPeriod.toFixed(1) + ' years' },
       qualityScore: results.qualityScore, decision: results.decision.label,
       analysis: aiAnalysisText,
-      aiAnalysis: aiAnalysisText,
       industry, country, scenario,
-    }));
+      calculatorInputs: { purchasePrice, ebitda, exitYears, exitMultiple },
+      calculatorResults: { irr: results.irr, moic: results.moic, exitValue: results.exitValue, cashReturn: results.cashReturn, paybackPeriod: results.paybackPeriod, qualityScore: results.qualityScore },
+    });
   };
 
   return (

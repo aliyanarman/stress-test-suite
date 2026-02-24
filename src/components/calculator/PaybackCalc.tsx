@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { calculatePaybackAnalysis, calculateQualityScore, getExecutiveDecision } from '@/utils/calculations';
 import { getIndustryData } from '@/utils/marketData';
-import { formatCurrency, parseNumericInput, generateExportMemo, downloadMemo } from '@/utils/formatters';
+import { formatCurrency, parseNumericInput, downloadMemoPDF } from '@/utils/formatters';
 import CalculatorInput from './CalculatorInput';
 import CountrySelector from './CountrySelector';
 import AIAnalysis from './AIAnalysis';
@@ -58,15 +58,16 @@ export default function PaybackCalc({ industry, country, onCountryChange, onCalc
 
   const exportMemo = () => {
     if (!results) return;
-    downloadMemo(generateExportMemo({
+    downloadMemoPDF({
       type: 'Payback Analysis',
       inputs: { 'Investment Cost': formatCurrency(parseNumericInput(investmentCost), country), 'Annual Savings/Earnings': formatCurrency(parseNumericInput(annualSavings), country) },
       results: { 'Payback Period': results.paybackYears < 1 ? `${(results.paybackYears * 12).toFixed(1)} months` : `${results.paybackYears.toFixed(1)} years`, 'Annual ROI': results.roi.toFixed(1) + '%', '3-Year Profit': formatCurrency(results.year3, country), '5-Year Profit': formatCurrency(results.year5, country), 'Real Value (Inflation-Adj)': formatCurrency(results.realCumulativeSavings, country) },
       qualityScore: results.qualityScore, decision: results.decision.label,
       analysis: aiAnalysisText,
-      aiAnalysis: aiAnalysisText,
       industry, country, scenario: 'base',
-    }));
+      calculatorInputs: { investmentCost, annualSavings },
+      calculatorResults: { paybackYears: results.paybackYears, roi: results.roi, year3Profit: results.year3, year5Profit: results.year5, realCumulativeSavings: results.realCumulativeSavings, purchasingPowerRetained: results.purchasingPowerRetained, qualityScore: results.qualityScore },
+    });
   };
 
   return (

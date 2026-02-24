@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { calculateFutureValue, calculateQualityScore, getExecutiveDecision, SCENARIO_MULTIPLIERS, type Scenario } from '@/utils/calculations';
 import { getIndustryData } from '@/utils/marketData';
-import { formatCurrency, parseNumericInput, generateExportMemo, downloadMemo } from '@/utils/formatters';
+import { formatCurrency, parseNumericInput, downloadMemoPDF } from '@/utils/formatters';
 import CalculatorInput from './CalculatorInput';
 import RadarChart from './RadarChart';
 import CountrySelector from './CountrySelector';
@@ -71,16 +71,16 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
 
   const exportMemo = () => {
     if (!results) return;
-    const memo = generateExportMemo({
+    downloadMemoPDF({
       type: 'Future Value',
       inputs: { 'Current Value': formatCurrency(parseNumericInput(currentValue), country), 'Growth Rate': growthRate + '%', 'Years': years },
       results: { 'Future Value': formatCurrency(results.fv, country), 'Total Growth': formatCurrency(results.totalGrowth, country), 'Percent Growth': results.percentGrowth.toFixed(1) + '%' },
       qualityScore: results.qualityScore, decision: results.decision.label,
       analysis: aiAnalysisText,
-      aiAnalysis: aiAnalysisText,
       industry, country, scenario,
+      calculatorInputs: { currentValue, growthRate, years },
+      calculatorResults: { futureValue: results.fv, totalGrowth: results.totalGrowth, percentGrowth: results.percentGrowth, qualityScore: results.qualityScore, annualGrowth: results.gr },
     });
-    downloadMemo(memo);
   };
 
   return (

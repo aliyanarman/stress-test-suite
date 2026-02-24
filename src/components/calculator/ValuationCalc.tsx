@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { calculateQualityScore, getExecutiveDecision } from '@/utils/calculations';
 import { getIndustryData } from '@/utils/marketData';
-import { formatCurrency, parseNumericInput, generateExportMemo, downloadMemo } from '@/utils/formatters';
+import { formatCurrency, parseNumericInput, downloadMemoPDF } from '@/utils/formatters';
 import CalculatorInput from './CalculatorInput';
 import RadarChart from './RadarChart';
 import AIAnalysis from './AIAnalysis';
@@ -54,14 +54,16 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
 
   const exportMemo = () => {
     if (!results) return;
-    downloadMemo(generateExportMemo({
-      type: 'Valuation', inputs: { Revenue: revenue, EBITDA: ebitda },
+    downloadMemoPDF({
+      type: 'Valuation',
+      inputs: { Revenue: revenue, EBITDA: ebitda },
       results: { 'Conservative (25th %ile)': formatCurrency(results.valuationLow, country), 'Market Value (50th %ile)': formatCurrency(results.valuationMid, country), 'Optimistic (75th %ile)': formatCurrency(results.valuationHigh, country), 'EBITDA Margin': results.margin.toFixed(1) + '%', 'EV/Revenue': results.evToRevenue.toFixed(1) + 'x' },
       qualityScore: results.qualityScore, decision: results.decision.label,
       analysis: aiAnalysisText,
-      aiAnalysis: aiAnalysisText,
       industry, country, scenario: 'base',
-    }));
+      calculatorInputs: { revenue, ebitda },
+      calculatorResults: { valuationLow: results.valuationLow, valuationMid: results.valuationMid, valuationHigh: results.valuationHigh, margin: results.margin, evToRevenue: results.evToRevenue, qualityScore: results.qualityScore },
+    });
   };
 
   return (

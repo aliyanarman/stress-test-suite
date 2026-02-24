@@ -9,32 +9,59 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { calculatorType, inputs, results, industry, country } = await req.json();
+    const { calculatorType, inputs, results, industry, country, detailedMemo } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are a senior financial analyst at Alight. You provide direct, numbers-driven deal analysis.
+    let systemPrompt: string;
+    let userPrompt: string;
+
+    if (detailedMemo) {
+      // Detailed memo mode for PDF export
+      systemPrompt = `You are a senior investment analyst at a top-tier advisory firm. Write a detailed investment analysis section for a professional PDF memorandum.
 
 Rules:
-- No emojis. Ever. No dramatic metaphors or hyperbole. No phrases like "defies the laws of" or "rocket ship" or "home run".
-- Be conversational but professional — like a senior analyst talking to a fund partner over coffee.
-- Use the specific numbers from the data provided. Reference the actual figures.
-- Compare against the industry benchmarks given.
-- 3-4 sentences maximum. Every word earns its place.
-- In the final 1-2 sentences, briefly reference ONE real-world comparable — a specific deal, acquisition, or company outcome that is relevant. Include the approximate year and result (e.g., "Similar to KKR's 2007 First Data buyout at 11x EBITDA which returned 3.2x over 7 years" or "Companies at this margin historically trade at 8-10x, like Salesforce circa 2020"). If no strong comparable exists, cite a relevant market statistic.
-- End with a clear one-line action: what to do or not do.
-- No bullet points. Flowing prose only.
-- Currency and numbers should match the user's market context.
-- Match the tone of a straightforward static financial analysis — no AI-sounding language.`;
+- Write 2-3 paragraphs of substantive analysis.
+- Reference specific numbers from the data provided.
+- Compare performance against industry benchmarks in the specific country/market.
+- Include 2-3 real-world comparable transactions or companies from the same industry and country/region. Include approximate year, deal size, and outcome.
+- Discuss risk factors and opportunities specific to this industry and market.
+- Use professional Wall Street tone — formal but clear.
+- No emojis. No bullet points. Flowing prose only.
+- Currency and numbers should match the user's market context.`;
 
-    const userPrompt = `Calculator: ${calculatorType}
+      userPrompt = `Calculator: ${calculatorType}
 Market: ${country}
 Industry: ${industry}
 
 Inputs: ${JSON.stringify(inputs)}
 Results: ${JSON.stringify(results)}
 
-Give me your analyst take on this deal/investment.`;
+Write a detailed market analysis with real-world comparables for the investment memorandum PDF.`;
+    } else {
+      // Short analysis mode for in-app display
+      systemPrompt = `You are a straightforward financial analyst. Give a short, clear analysis of the numbers.
+
+Rules:
+- 3-4 sentences MAXIMUM. Be concise.
+- Use simple, everyday language. Avoid heavy financial jargon.
+- No emojis. No dramatic language. No phrases like "defies the laws" or "rocket ship".
+- Reference the actual numbers from the data.
+- Compare against what's typical for this industry and country.
+- Say whether it's good, average, or below average — plainly.
+- End with one clear takeaway or action.
+- If a relevant real-world deal or company outcome exists, mention it in one sentence at the end with the year.
+- Keep it readable for someone without a finance background.`;
+
+      userPrompt = `Calculator: ${calculatorType}
+Market: ${country}
+Industry: ${industry}
+
+Inputs: ${JSON.stringify(inputs)}
+Results: ${JSON.stringify(results)}
+
+Give me a short, plain-language take on these numbers.`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -48,7 +75,8 @@ Give me your analyst take on this deal/investment.`;
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        stream: true,
+        stream: !detailedMemo,
+        ...(detailedMemo ? { max_tokens: 1500 } : {}),
       }),
     });
 
@@ -59,7 +87,7 @@ Give me your analyst take on this deal/investment.`;
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Top up in Settings." }), {
+        return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -67,6 +95,14 @@ Give me your analyst take on this deal/investment.`;
       console.error("AI gateway error:", response.status, t);
       return new Response(JSON.stringify({ error: "AI analysis unavailable" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (detailedMemo) {
+      const data = await response.json();
+      const text = data.choices?.[0]?.message?.content || "";
+      return new Response(JSON.stringify({ analysis: text }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
