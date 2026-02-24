@@ -260,7 +260,7 @@
     display: flex;
     justify-content: center;
     align-items: stretch;
-    gap: 0;
+    gap: 12px;
     margin-bottom: 24px;
   }
 
@@ -269,7 +269,7 @@
     align-items: center;
     justify-content: center;
     padding: 12px 28px;
-    border-radius: 50px 0 0 50px;
+    border-radius: 50px;
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 1.2px;
@@ -281,19 +281,22 @@
   .decision-go {
     background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
     color: hsl(var(--status-excellent));
-    border: 2px solid rgba(34, 197, 94, 0.4);
+    border: 2px solid rgba(34, 197, 94, 0.5);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.25), 0 0 24px rgba(34, 197, 94, 0.1);
   }
 
   .decision-caution {
     background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.1));
     color: hsl(var(--status-average));
-    border: 2px solid rgba(251, 191, 36, 0.4);
+    border: 2px solid rgba(251, 191, 36, 0.5);
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.25), 0 0 24px rgba(251, 191, 36, 0.1);
   }
 
   .decision-pass {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
     color: hsl(var(--status-poor));
-    border: 2px solid rgba(239, 68, 68, 0.4);
+    border: 2px solid rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.25), 0 0 24px rgba(239, 68, 68, 0.1);
   }
 
   .quality-score-badge {
@@ -302,9 +305,8 @@
     justify-content: center;
     gap: 6px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    border-left: none;
-    border-radius: 0 50px 50px 0;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
     padding: 12px 24px;
     min-height: 52px;
     min-width: 90px;
