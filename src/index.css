@@ -234,6 +234,10 @@
     border-radius: 20px;
     padding: 24px;
     flex: 1.8;
+    max-height: 240px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
@@ -259,8 +263,7 @@
   .badge-row {
     display: flex;
     justify-content: center;
-    align-items: stretch;
-    gap: 12px;
+    align-items: center;
     margin-bottom: 24px;
   }
 
@@ -268,48 +271,35 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 28px;
+    padding: 14px 36px;
     border-radius: 50px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 1.2px;
     text-transform: uppercase;
     min-height: 52px;
-    min-width: 160px;
+    min-width: 180px;
   }
 
   .decision-go {
     background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
     color: hsl(var(--status-excellent));
     border: 2px solid rgba(34, 197, 94, 0.5);
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.25), 0 0 24px rgba(34, 197, 94, 0.1);
+    box-shadow: 0 0 16px rgba(34, 197, 94, 0.3), 0 0 32px rgba(34, 197, 94, 0.15);
   }
 
   .decision-caution {
     background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.1));
     color: hsl(var(--status-average));
     border: 2px solid rgba(251, 191, 36, 0.5);
-    box-shadow: 0 0 12px rgba(251, 191, 36, 0.25), 0 0 24px rgba(251, 191, 36, 0.1);
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.3), 0 0 32px rgba(251, 191, 36, 0.15);
   }
 
   .decision-pass {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
     color: hsl(var(--status-poor));
     border: 2px solid rgba(239, 68, 68, 0.5);
-    box-shadow: 0 0 12px rgba(239, 68, 68, 0.25), 0 0 24px rgba(239, 68, 68, 0.1);
-  }
-
-  .quality-score-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50px;
-    padding: 12px 24px;
-    min-height: 52px;
-    min-width: 90px;
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.3), 0 0 32px rgba(239, 68, 68, 0.15);
   }
 
   .status-excellent {
