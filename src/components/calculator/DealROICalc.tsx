@@ -41,6 +41,8 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
     const moic = calculateMOIC(pp, eb, ey, exitValue);
     const cashReturn = ((exitValue + eb * ey - pp) / pp) * 100;
     const paybackPeriod = pp / eb;
+    const entryMultiple = pp / eb;
+    const annualYield = (eb / pp) * 100;
 
     const ind = getIndustryData(industry, country);
     const qualityScore = calculateQualityScore({
@@ -50,7 +52,7 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
     });
     const decision = getExecutiveDecision(qualityScore, 'deal');
 
-    setResults({ irr, moic, exitValue, cashReturn, paybackPeriod, qualityScore, decision, ind, eb, ey });
+    setResults({ irr, moic, exitValue, cashReturn, paybackPeriod, entryMultiple, annualYield, qualityScore, decision, ind, eb, ey });
   };
 
   const handleCalculateClick = () => {
@@ -82,12 +84,12 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
     downloadMemoPDF({
       type: 'Deal ROI / LBO',
       inputs: { 'Purchase Price': purchasePrice, EBITDA: ebitda, 'Exit Years': exitYears, 'Exit Multiple': exitMultiple + 'x' },
-      results: { 'IRR (True)': results.irr.toFixed(1) + '%', 'MOIC (incl. cash flows)': results.moic.toFixed(2) + 'x', 'Exit Value': formatCurrency(results.exitValue, country), 'Cash Return': results.cashReturn.toFixed(1) + '%', 'Payback Period': results.paybackPeriod.toFixed(1) + ' years' },
+      results: { 'IRR (True)': results.irr.toFixed(1) + '%', 'MOIC (incl. cash flows)': results.moic.toFixed(2) + 'x', 'Exit Value': formatCurrency(results.exitValue, country), 'Cash Return': results.cashReturn.toFixed(1) + '%', 'Entry Multiple': results.entryMultiple.toFixed(1) + 'x', 'Annual Yield': results.annualYield.toFixed(1) + '%' },
       qualityScore: results.qualityScore, decision: results.decision.label,
       analysis: aiAnalysisText,
       industry, country, scenario,
       calculatorInputs: { purchasePrice, ebitda, exitYears, exitMultiple },
-      calculatorResults: { irr: results.irr, moic: results.moic, exitValue: results.exitValue, cashReturn: results.cashReturn, paybackPeriod: results.paybackPeriod, qualityScore: results.qualityScore },
+      calculatorResults: { irr: results.irr, moic: results.moic, exitValue: results.exitValue, cashReturn: results.cashReturn, entryMultiple: results.entryMultiple, annualYield: results.annualYield, paybackPeriod: results.paybackPeriod, qualityScore: results.qualityScore },
     });
     setShowExportDialog(false);
   }, [results, purchasePrice, ebitda, exitYears, exitMultiple, aiAnalysisText, industry, country, scenario]);
@@ -134,13 +136,9 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Payback Period</div><div className="text-3xl font-bold text-foreground">{results.paybackPeriod.toFixed(1)} yrs</div></div>
             </div>
 
-            <div className="badge-row">
-              <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
-            </div>
-
             <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">IRR Target</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.peIRR}%+</div><div className="text-[11px] text-muted-foreground">PE hurdle rate in {results.ind.marketName}</div></div>
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">MOIC Target</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.peMOIC}x+</div><div className="text-[11px] text-muted-foreground">Return multiple for {results.ind.marketName} buyouts</div></div>
+              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Entry Multiple</div><div className="text-2xl font-bold text-foreground mb-1">{results.entryMultiple.toFixed(1)}x</div><div className="text-[11px] text-muted-foreground">Price / Annual Profit</div></div>
+              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Annual Yield</div><div className="text-2xl font-bold text-foreground mb-1">{results.annualYield.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Yearly return on investment</div></div>
             </div>
 
             <div className="flex gap-4 items-stretch">
@@ -149,7 +147,7 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
                 <AIAnalysis
                   calculatorType="Deal ROI"
                   inputs={{ purchasePrice, ebitda, exitYears, exitMultiple }}
-                  results={{ irr: results.irr, moic: results.moic, exitValue: results.exitValue, cashReturn: results.cashReturn, paybackPeriod: results.paybackPeriod, qualityScore: results.qualityScore }}
+                  results={{ irr: results.irr, moic: results.moic, exitValue: results.exitValue, cashReturn: results.cashReturn, entryMultiple: results.entryMultiple, annualYield: results.annualYield, paybackPeriod: results.paybackPeriod, qualityScore: results.qualityScore }}
                   industry={industry} country={country}
                   onAnalysisComplete={setAiAnalysisText}
                 />

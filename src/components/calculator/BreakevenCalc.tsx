@@ -1,18 +1,21 @@
 import { useState, useRef, useCallback } from 'react';
 import { calculateBreakeven, calculateQualityScore } from '@/utils/calculations';
-import { getIndustryData } from '@/utils/marketData';
+import { getIndustryData, INDUSTRIES } from '@/utils/marketData';
 import { formatCurrency, parseNumericInput, downloadMemoPDF } from '@/utils/formatters';
 import CalculatorInput from './CalculatorInput';
+import CountrySelector from './CountrySelector';
 import AIAnalysis from './AIAnalysis';
 import ExportMemoDialog from './ExportMemoDialog';
 
 interface Props {
   industry: string;
   country: string;
+  onCountryChange: (c: string) => void;
+  onIndustryChange: (i: string) => void;
   onCalculate?: () => void;
 }
 
-export default function BreakevenCalc({ industry, country, onCalculate }: Props) {
+export default function BreakevenCalc({ industry, country, onCountryChange, onIndustryChange, onCalculate }: Props) {
   const [fixedCosts, setFixedCosts] = useState('');
   const [pricePerUnit, setPricePerUnit] = useState('');
   const [costPerUnit, setCostPerUnit] = useState('');
@@ -68,7 +71,12 @@ export default function BreakevenCalc({ industry, country, onCalculate }: Props)
 
   return (
     <div className="glass-card">
-      <h2 className="text-2xl font-semibold text-foreground mb-8 tracking-tight">Breakeven Calculator</h2>
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-2xl font-semibold text-foreground tracking-tight">Breakeven Calculator</h2>
+        <select className="glass-select" value={industry} onChange={e => onIndustryChange(e.target.value)} style={{ width: 'auto', padding: '10px 35px 10px 16px' }}>
+          {INDUSTRIES.map(i => <option key={i.value} value={i.value}>{i.label}</option>)}
+        </select>
+      </div>
       <CalculatorInput label="What are your fixed costs? (monthly)" value={fixedCosts} onChange={setFixedCosts} prefix="$" formatCommas placeholder="100,000" />
       <CalculatorInput label="What do you sell each unit for?" value={pricePerUnit} onChange={setPricePerUnit} prefix="$" formatCommas placeholder="50" />
       <CalculatorInput label="What does each unit cost you?" value={costPerUnit} onChange={setCostPerUnit} prefix="$" formatCommas placeholder="20" />
@@ -78,6 +86,10 @@ export default function BreakevenCalc({ industry, country, onCalculate }: Props)
 
       {results && (
         <div ref={resultsRef} className="mt-12 pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
+          <div className="flex gap-3 mb-6 justify-end">
+            <CountrySelector value={country} onChange={(c) => { onCountryChange(c); setTimeout(() => calculate(), 50); }} />
+          </div>
+
           <div className="mb-8">
             <div className="text-[15px] font-medium text-muted-foreground mb-2">Units Needed to Breakeven</div>
             <div className="text-5xl font-bold text-foreground tracking-tight">{results.breakevenUnits.toLocaleString()}</div>
@@ -90,12 +102,6 @@ export default function BreakevenCalc({ industry, country, onCalculate }: Props)
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Profit Margin</div><div className="text-3xl font-bold text-foreground">{results.profitMargin.toFixed(1)}%</div></div>
               <div className="liquid-glass-box"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">At Volume</div><div className="text-3xl font-bold text-foreground">{results.breakevenUnits.toLocaleString()}</div></div>
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Contribution/Unit</div><div className="text-3xl font-bold text-foreground">{formatCurrency(results.contribution, country)}</div></div>
-            </div>
-
-            <div className="badge-row">
-              <div className={`executive-decision decision-${results.qualityScore >= 7 ? 'go' : results.qualityScore >= 4 ? 'caution' : 'pass'}`}>
-                {results.profitMargin >= 40 ? 'STRONG' : results.profitMargin >= 20 ? 'VIABLE' : 'WEAK'}
-              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-5">

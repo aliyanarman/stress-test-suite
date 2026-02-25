@@ -17,7 +17,6 @@ serve(async (req) => {
     let userPrompt: string;
 
     if (detailedMemo) {
-      // Detailed memo mode for PDF export
       systemPrompt = `You are a senior investment analyst at a top-tier advisory firm. Write a detailed investment analysis section for a professional PDF memorandum.
 
 Rules:
@@ -40,19 +39,22 @@ Results: ${JSON.stringify(results)}
 
 Write a detailed market analysis with real-world comparables for the investment memorandum PDF.`;
     } else {
-      // Short analysis mode for in-app display
-      systemPrompt = `You are a straightforward financial analyst. Give a short, clear analysis of the numbers.
+      systemPrompt = `You are a concise financial advisor. Give an actionable verdict on the numbers.
+
+HARD LIMITS — you MUST obey these:
+- MAXIMUM 50 words. Do NOT exceed 50 words under any circumstances.
+- MAXIMUM 320 characters total.
+- 3-4 sentences ONLY.
 
 Rules:
-- 4-5 sentences MAXIMUM. Do not exceed 5 sentences under any circumstances.
-- Use simple, everyday language. No financial jargon.
-- No emojis. No dramatic language. No metaphors. No markdown formatting (no **, no *, no #, no backticks).
-- Reference the actual numbers from the data.
-- Compare against what's typical for this industry and country.
-- Say whether it's good, average, or below average — plainly.
-- End with one clear takeaway.
-- Write in plain text only. No bullet points. No bold. No special characters.
-- Keep it readable for someone without a finance background.`;
+- Tell the user what to DO with this deal/investment (proceed, hold, avoid, etc).
+- Mention the country and industry context briefly.
+- Reference one or two key numbers.
+- Say whether it beats or trails the industry average.
+- Use simple everyday language. No jargon.
+- No emojis. No markdown (no **, no *, no #, no backticks).
+- Plain text only. No bullet points. No bold.
+- Every word must earn its place. Be ruthlessly concise.`;
 
       userPrompt = `Calculator: ${calculatorType}
 Market: ${country}
@@ -61,7 +63,7 @@ Industry: ${industry}
 Inputs: ${JSON.stringify(inputs)}
 Results: ${JSON.stringify(results)}
 
-Give me a short, plain-language take on these numbers.`;
+Give a 3-4 sentence actionable verdict. Max 50 words, 320 characters.`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -77,7 +79,7 @@ Give me a short, plain-language take on these numbers.`;
           { role: "user", content: userPrompt },
         ],
         stream: !detailedMemo,
-        ...(detailedMemo ? { max_tokens: 1500 } : {}),
+        ...(detailedMemo ? { max_tokens: 1500 } : { max_tokens: 120 }),
       }),
     });
 

@@ -103,10 +103,6 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">EV/Revenue</div><div className="text-3xl font-bold text-foreground">{results.evToRevenue.toFixed(1)}x</div></div>
             </div>
 
-            <div className="badge-row">
-              <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
-            </div>
-
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="liquid-glass-box p-4">
                 <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Conservative</div>

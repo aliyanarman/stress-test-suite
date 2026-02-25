@@ -78,6 +78,10 @@ export default function PaybackCalc({ industry, country, onCountryChange, onCalc
     setShowExportDialog(true);
   };
 
+  const formatProfit = (val: number) => {
+    return formatCurrency(Math.abs(val), country);
+  };
+
   return (
     <div className="glass-card">
       <h2 className="text-2xl font-semibold text-foreground mb-8 tracking-tight">Investment Payback Calculator</h2>
@@ -104,8 +108,20 @@ export default function PaybackCalc({ industry, country, onCountryChange, onCalc
           <div className="comparison-section">
             <h3 className="text-lg font-semibold text-foreground mb-5">5-Year Projection</h3>
             <div className="metrics-ribbon">
-              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">3-Year Profit</div><div className="text-3xl font-bold text-foreground">{formatCurrency(results.year3, country)}</div></div>
-              <div className="liquid-glass-box"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">5-Year Profit</div><div className="text-3xl font-bold text-foreground">{formatCurrency(results.year5, country)}</div></div>
+              <div className="text-center">
+                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">3-Year Profit</div>
+                <div className="text-3xl font-bold text-foreground">
+                  {results.year3 < 0 && <span className="text-destructive/70 text-lg mr-1">Loss </span>}
+                  {formatProfit(results.year3)}
+                </div>
+              </div>
+              <div className="liquid-glass-box">
+                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">5-Year Profit</div>
+                <div className="text-3xl font-bold text-foreground">
+                  {results.year5 < 0 && <span className="text-destructive/70 text-lg mr-1">Loss </span>}
+                  {formatProfit(results.year5)}
+                </div>
+              </div>
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Annual Return</div><div className="text-3xl font-bold text-foreground">{results.roi.toFixed(1)}%</div></div>
             </div>
             <div className="mt-5 text-center">

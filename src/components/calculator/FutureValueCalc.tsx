@@ -129,13 +129,9 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Annual Growth</div><div className="text-3xl font-bold text-foreground">{results.gr.toFixed(1)}%</div><div className="text-[10px] text-muted-foreground mt-1">(Compound)</div></div>
             </div>
 
-            <div className="badge-row">
-              <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
-            </div>
-
             <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Average Growth</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.avgGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">The average for {results.ind.name} is {results.ind.avgGrowth.toFixed(1)}% in {results.ind.marketName}</div></div>
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Top Performers</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.excellentGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Market leaders in {results.ind.name} achieve {results.ind.excellentGrowth.toFixed(1)}%</div></div>
+              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Average Growth</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.avgGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">{results.ind.name} avg in {results.ind.marketName}</div></div>
+              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Top Performers</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.excellentGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Leaders in {results.ind.marketName}</div></div>
             </div>
 
             <div className="flex gap-4 items-stretch">
