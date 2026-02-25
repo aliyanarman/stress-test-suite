@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { calculateBreakeven, calculateQualityScore } from '@/utils/calculations';
 import { getIndustryData } from '@/utils/marketData';
 import { formatCurrency, parseNumericInput, downloadMemoPDF } from '@/utils/formatters';
 import CalculatorInput from './CalculatorInput';
 import AIAnalysis from './AIAnalysis';
+import ExportMemoDialog from './ExportMemoDialog';
 
 interface Props {
   industry: string;
@@ -17,6 +18,7 @@ export default function BreakevenCalc({ industry, country, onCalculate }: Props)
   const [costPerUnit, setCostPerUnit] = useState('');
   const [results, setResults] = useState<any>(null);
   const [aiAnalysisText, setAiAnalysisText] = useState('');
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const calculate = () => {
@@ -44,7 +46,7 @@ export default function BreakevenCalc({ industry, country, onCalculate }: Props)
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
   };
 
-  const exportMemo = () => {
+  const doExport = useCallback(() => {
     if (!results) return;
     downloadMemoPDF({
       type: 'Breakeven Analysis',
@@ -56,6 +58,12 @@ export default function BreakevenCalc({ industry, country, onCalculate }: Props)
       calculatorInputs: { fixedCosts, pricePerUnit, costPerUnit },
       calculatorResults: { breakevenUnits: results.breakevenUnits, breakevenRevenue: results.breakevenRevenue, profitMargin: results.profitMargin, contribution: results.contribution, qualityScore: results.qualityScore },
     });
+    setShowExportDialog(false);
+  }, [results, fixedCosts, pricePerUnit, costPerUnit, aiAnalysisText, industry, country]);
+
+  const exportMemo = () => {
+    if (!results) return;
+    setShowExportDialog(true);
   };
 
   return (
@@ -88,7 +96,6 @@ export default function BreakevenCalc({ industry, country, onCalculate }: Props)
               <div className={`executive-decision decision-${results.qualityScore >= 7 ? 'go' : results.qualityScore >= 4 ? 'caution' : 'pass'}`}>
                 {results.profitMargin >= 40 ? 'STRONG' : results.profitMargin >= 20 ? 'VIABLE' : 'WEAK'}
               </div>
-              <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-5">
@@ -113,6 +120,7 @@ export default function BreakevenCalc({ industry, country, onCalculate }: Props)
           </div>
         </div>
       )}
+      <ExportMemoDialog open={showExportDialog} onComplete={doExport} />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { calculateIRR, buildDealCashFlows, calculateMOIC, calculateQualityScore, getExecutiveDecision, SCENARIO_MULTIPLIERS, type Scenario } from '@/utils/calculations';
 import { getIndustryData } from '@/utils/marketData';
 import { formatCurrency, parseNumericInput, downloadMemoPDF } from '@/utils/formatters';
@@ -6,6 +6,7 @@ import CalculatorInput from './CalculatorInput';
 import RadarChart from './RadarChart';
 import CountrySelector from './CountrySelector';
 import AIAnalysis from './AIAnalysis';
+import ExportMemoDialog from './ExportMemoDialog';
 
 interface Props {
   industry: string;
@@ -24,6 +25,7 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
   const [baseVals, setBaseVals] = useState<{ multiple: number; ebitda: number } | null>(null);
   const [results, setResults] = useState<any>(null);
   const [aiAnalysisText, setAiAnalysisText] = useState('');
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const calculate = (overrideMultiple?: number, overrideEbitda?: number) => {
@@ -75,7 +77,7 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
     calculate(baseVals?.multiple, baseVals?.ebitda);
   };
 
-  const exportMemo = () => {
+  const doExport = useCallback(() => {
     if (!results) return;
     downloadMemoPDF({
       type: 'Deal ROI / LBO',
@@ -87,6 +89,12 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
       calculatorInputs: { purchasePrice, ebitda, exitYears, exitMultiple },
       calculatorResults: { irr: results.irr, moic: results.moic, exitValue: results.exitValue, cashReturn: results.cashReturn, paybackPeriod: results.paybackPeriod, qualityScore: results.qualityScore },
     });
+    setShowExportDialog(false);
+  }, [results, purchasePrice, ebitda, exitYears, exitMultiple, aiAnalysisText, industry, country, scenario]);
+
+  const exportMemo = () => {
+    if (!results) return;
+    setShowExportDialog(true);
   };
 
   return (
@@ -128,7 +136,6 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
 
             <div className="badge-row">
               <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
-              <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-5">
@@ -163,6 +170,7 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
           </div>
         </div>
       )}
+      <ExportMemoDialog open={showExportDialog} onComplete={doExport} />
     </div>
   );
 }

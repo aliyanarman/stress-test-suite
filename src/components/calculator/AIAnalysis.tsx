@@ -9,6 +9,17 @@ interface Props {
   onAnalysisComplete?: (text: string) => void;
 }
 
+function cleanAIText(text: string): string {
+  return text
+    .replace(/\*\*/g, '')
+    .replace(/\*/g, '')
+    .replace(/#{1,6}\s/g, '')
+    .replace(/`/g, '')
+    .replace(/[""]|[""]/g, '"')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 export default function AIAnalysis({ calculatorType, inputs, results, industry, country, onAnalysisComplete }: Props) {
   const [analysis, setAnalysis] = useState('');
   const [loading, setLoading] = useState(false);
@@ -80,12 +91,14 @@ export default function AIAnalysis({ calculatorType, inputs, results, industry, 
           try {
             const parsed = JSON.parse(json);
             const content = parsed.choices?.[0]?.delta?.content;
-            if (content) { text += content; setAnalysis(text); }
+            if (content) { text += content; setAnalysis(cleanAIText(text)); }
           } catch { /* partial */ }
         }
       }
 
-      onAnalysisComplete?.(text);
+      const cleaned = cleanAIText(text);
+      setAnalysis(cleaned);
+      onAnalysisComplete?.(cleaned);
     } catch (e: any) {
       if (e?.name === 'AbortError') return;
       setError('Failed to connect to AI.');
@@ -95,7 +108,9 @@ export default function AIAnalysis({ calculatorType, inputs, results, industry, 
 
   if (loading && !analysis) {
     return (
-      <div className="text-sm text-foreground/60 animate-pulse">Analyzing your numbers...</div>
+      <div className="flex-1">
+        <div className="text-sm text-foreground/60 animate-pulse">Analyzing your numbers...</div>
+      </div>
     );
   }
 
@@ -105,20 +120,12 @@ export default function AIAnalysis({ calculatorType, inputs, results, industry, 
 
   if (analysis) {
     return (
-      <>
-        <div className="text-sm leading-relaxed text-foreground/80">{analysis}</div>
-        <div className="flex items-center justify-between mt-4">
-          <button className="text-xs text-foreground/40 hover:text-foreground/60 transition-colors" onClick={() => fetchAnalysis()}>
-            Regenerate
-          </button>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[9px] text-foreground/25 uppercase tracking-widest mr-1">Sources</span>
-            <a href="https://www.bloomberg.com/markets" target="_blank" rel="noopener noreferrer" className="source-pill">Bloomberg</a>
-            <a href="https://pitchbook.com" target="_blank" rel="noopener noreferrer" className="source-pill">PitchBook</a>
-            <a href="https://www.spglobal.com/ratings" target="_blank" rel="noopener noreferrer" className="source-pill">S&P</a>
-          </div>
+      <div className="flex flex-col flex-1 min-h-0">
+        <div className="text-sm leading-relaxed text-foreground/80 overflow-hidden flex-1">{analysis}</div>
+        <div className="mt-auto pt-3 flex items-center">
+          <span className="text-[10px] text-foreground/25 tracking-wide">Analysis by Gemini</span>
         </div>
-      </>
+      </div>
     );
   }
 

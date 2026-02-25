@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { calculateFutureValue, calculateQualityScore, getExecutiveDecision, SCENARIO_MULTIPLIERS, type Scenario } from '@/utils/calculations';
 import { getIndustryData } from '@/utils/marketData';
 import { formatCurrency, parseNumericInput, downloadMemoPDF } from '@/utils/formatters';
@@ -6,6 +6,7 @@ import CalculatorInput from './CalculatorInput';
 import RadarChart from './RadarChart';
 import CountrySelector from './CountrySelector';
 import AIAnalysis from './AIAnalysis';
+import ExportMemoDialog from './ExportMemoDialog';
 
 interface Props {
   industry: string;
@@ -23,6 +24,7 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
   const [baseGrowth, setBaseGrowth] = useState<number | null>(null);
   const [results, setResults] = useState<any>(null);
   const [aiAnalysisText, setAiAnalysisText] = useState('');
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const calculate = (overrideGrowth?: number) => {
@@ -69,7 +71,7 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
     calculate(baseGrowth ?? undefined);
   };
 
-  const exportMemo = () => {
+  const doExport = useCallback(() => {
     if (!results) return;
     downloadMemoPDF({
       type: 'Future Value',
@@ -81,6 +83,12 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
       calculatorInputs: { currentValue, growthRate, years },
       calculatorResults: { futureValue: results.fv, totalGrowth: results.totalGrowth, percentGrowth: results.percentGrowth, qualityScore: results.qualityScore, annualGrowth: results.gr },
     });
+    setShowExportDialog(false);
+  }, [results, currentValue, growthRate, years, aiAnalysisText, industry, country, scenario]);
+
+  const exportMemo = () => {
+    if (!results) return;
+    setShowExportDialog(true);
   };
 
   return (
@@ -123,7 +131,6 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
 
             <div className="badge-row">
               <div className={`executive-decision decision-${results.decision.type}`}>{results.decision.label}</div>
-              <div className="quality-score-badge"><span className="text-2xl font-bold text-foreground">{results.qualityScore}</span><span className="text-xs text-muted-foreground uppercase tracking-wider">/ 10</span></div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-5">
@@ -158,6 +165,7 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
           </div>
         </div>
       )}
+      <ExportMemoDialog open={showExportDialog} onComplete={doExport} />
     </div>
   );
 }

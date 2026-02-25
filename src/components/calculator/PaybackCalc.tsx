@@ -1,10 +1,11 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { calculatePaybackAnalysis, calculateQualityScore, getExecutiveDecision } from '@/utils/calculations';
 import { getIndustryData } from '@/utils/marketData';
 import { formatCurrency, parseNumericInput, downloadMemoPDF } from '@/utils/formatters';
 import CalculatorInput from './CalculatorInput';
 import CountrySelector from './CountrySelector';
 import AIAnalysis from './AIAnalysis';
+import ExportMemoDialog from './ExportMemoDialog';
 
 interface Props {
   industry: string;
@@ -18,6 +19,7 @@ export default function PaybackCalc({ industry, country, onCountryChange, onCalc
   const [annualSavings, setAnnualSavings] = useState('');
   const [results, setResults] = useState<any>(null);
   const [aiAnalysisText, setAiAnalysisText] = useState('');
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const calculate = () => {
@@ -56,7 +58,7 @@ export default function PaybackCalc({ industry, country, onCountryChange, onCalc
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
   };
 
-  const exportMemo = () => {
+  const doExport = useCallback(() => {
     if (!results) return;
     downloadMemoPDF({
       type: 'Payback Analysis',
@@ -68,6 +70,12 @@ export default function PaybackCalc({ industry, country, onCountryChange, onCalc
       calculatorInputs: { investmentCost, annualSavings },
       calculatorResults: { paybackYears: results.paybackYears, roi: results.roi, year3Profit: results.year3, year5Profit: results.year5, realCumulativeSavings: results.realCumulativeSavings, purchasingPowerRetained: results.purchasingPowerRetained, qualityScore: results.qualityScore },
     });
+    setShowExportDialog(false);
+  }, [results, investmentCost, annualSavings, aiAnalysisText, industry, country]);
+
+  const exportMemo = () => {
+    if (!results) return;
+    setShowExportDialog(true);
   };
 
   return (
@@ -131,6 +139,7 @@ export default function PaybackCalc({ industry, country, onCountryChange, onCalc
           </div>
         </div>
       )}
+      <ExportMemoDialog open={showExportDialog} onComplete={doExport} />
     </div>
   );
 }
