@@ -105,18 +105,15 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
 
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="liquid-glass-box p-4">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Conservative</div>
-                <div className="text-[10px] text-muted-foreground/70 mb-2">(25th %ile)</div>
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Conservative</div>
                 <div className="text-xl font-bold text-foreground">{formatCurrency(results.valuationLow, country)}</div>
               </div>
               <div className="liquid-glass-box p-4">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Market Value</div>
-                <div className="text-[10px] text-muted-foreground/70 mb-2">(50th %ile)</div>
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Market Value</div>
                 <div className="text-xl font-bold text-foreground">{formatCurrency(results.valuationMid, country)}</div>
               </div>
               <div className="liquid-glass-box p-4">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Optimistic</div>
-                <div className="text-[10px] text-muted-foreground/70 mb-2">(75th %ile)</div>
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Optimistic</div>
                 <div className="text-xl font-bold text-foreground">{formatCurrency(results.valuationHigh, country)}</div>
               </div>
             </div>
