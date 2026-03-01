@@ -23,19 +23,24 @@ export default function ExportMemoDialog({ open, onComplete }: Props) {
     if (!open) { setProgress(0); return; }
 
     const steps = [
-      { target: 15, delay: 300 },
-      { target: 35, delay: 800 },
-      { target: 55, delay: 1500 },
-      { target: 75, delay: 2500 },
-      { target: 90, delay: 3500 },
-      { target: 100, delay: 5000 },
+      { target: 8, delay: 500 },
+      { target: 18, delay: 2000 },
+      { target: 30, delay: 5000 },
+      { target: 45, delay: 10000 },
+      { target: 55, delay: 15000 },
+      { target: 65, delay: 20000 },
+      { target: 75, delay: 30000 },
+      { target: 85, delay: 40000 },
+      { target: 92, delay: 50000 },
+      { target: 97, delay: 55000 },
+      { target: 100, delay: 58000 },
     ];
 
     const timers = steps.map(s =>
       setTimeout(() => setProgress(s.target), s.delay)
     );
 
-    const done = setTimeout(() => onComplete(), 5500);
+    const done = setTimeout(() => onComplete(), 60000);
 
     return () => {
       timers.forEach(clearTimeout);
@@ -50,13 +55,19 @@ export default function ExportMemoDialog({ open, onComplete }: Props) {
       <div className="glass-card max-w-md w-full mx-4 text-center" style={{ padding: '40px 32px' }}>
         <div className="text-lg font-semibold text-foreground mb-2">Generating Investment Memo</div>
         <div className="text-sm text-muted-foreground mb-6">
-          {progress < 30
+          {progress < 10
             ? 'Compiling financial data...'
-            : progress < 60
-            ? 'Running detailed market analysis...'
-            : progress < 90
-            ? 'Formatting professional memorandum...'
-            : 'Finalizing document...'}
+            : progress < 25
+            ? 'Analyzing market context and comparables...'
+            : progress < 45
+            ? 'Running detailed AI analysis...'
+            : progress < 65
+            ? 'Cross-referencing industry benchmarks...'
+            : progress < 80
+            ? 'Generating McKinsey-style visuals...'
+            : progress < 95
+            ? 'Quality check — removing speculative claims...'
+            : 'Finalizing memorandum...'}
         </div>
 
         <div className="w-full h-2 rounded-full bg-foreground/10 mb-6 overflow-hidden">
@@ -74,7 +85,7 @@ export default function ExportMemoDialog({ open, onComplete }: Props) {
         </div>
 
         <div className="text-[10px] text-foreground/20 mt-4">
-          Please wait ~5 seconds
+          Please wait ~60 seconds for a thorough analysis
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ import BreakevenCalc from '@/components/calculator/BreakevenCalc';
 import ValuationCalc from '@/components/calculator/ValuationCalc';
 import PaybackCalc from '@/components/calculator/PaybackCalc';
 import SavedDealsPanel, { type SavedDeal } from '@/components/calculator/SavedDealsPanel';
-import { downloadAlightPitchdeck } from '@/utils/pitchdeck';
+
 
 const CALC_TABS = [
   { id: 'futureValue', label: 'Future Value' },
@@ -144,12 +144,9 @@ export default function Index() {
             <button onClick={() => setShowSavedDeals(true)} className="text-xs text-foreground/60 hover:text-foreground transition-colors cursor-pointer underline">
               Saved Deals ({savedDeals.length})
             </button>
-            <a href="https://github.com/aliyanarman/Pocket-Financial-Analyst/blob/main/Alight_Technical_Documentation.pdf" target="_blank" rel="noopener noreferrer" className="text-xs text-foreground/60 hover:text-foreground transition-colors cursor-pointer underline">
-              Guide
+            <a href="https://github.com/aliyanarman/Pocket-Financial-Analyst/blob/main/Alight%20Pitchdeck.pdf" target="_blank" rel="noopener noreferrer" className="text-xs text-foreground/60 hover:text-foreground transition-colors cursor-pointer underline">
+              Pitch Deck
             </a>
-            <button onClick={() => downloadAlightPitchdeck()} className="text-xs text-foreground/60 hover:text-foreground transition-colors cursor-pointer underline">
-              Investor Pitchdeck
-            </button>
           </div>
           <p className="text-xs text-foreground/40">© 2026 Aliyan Arman. All rights reserved.</p>
         </div>
