@@ -64,7 +64,7 @@ export default function Index() {
   const showNotification = (msg: string) => {
     const el = document.createElement('div');
     el.textContent = msg;
-    el.style.cssText = `position:fixed;top:80px;right:20px;background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(240,240,240,0.95));color:#000;padding:16px 24px;border-radius:12px;font-size:14px;font-weight:510;box-shadow:0 8px 32px rgba(0,0,0,0.3);z-index:10000;backdrop-filter:blur(20px);animation:slideInNotif 0.3s ease;`;
+    el.style.cssText = `position:fixed;top:80px;right:20px;background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(240,240,240,0.95));color:#000;padding:16px 24px;border-radius:12px;font-size:14px;font-weight:510;box-shadow:0 8px 32px rgba(0,0,0,0.3);z-index:10000;backdrop-filter:blur(20px);animation:slideInNotif 0.3s ease;max-width:calc(100vw - 40px);`;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 3000);
   };
@@ -108,17 +108,17 @@ export default function Index() {
   }, []);
 
   return (
-    <div className="min-h-screen px-5 pt-10 pb-24">
+    <div className="min-h-screen px-4 sm:px-5 pt-6 sm:pt-10 pb-24">
       <div className="max-w-[800px] mx-auto">
         {/* Header */}
-        <div className="mb-16 relative">
-          <h1 className="text-5xl font-bold tracking-tight text-foreground mb-3" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+        <div className="mb-10 sm:mb-16 relative">
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground mb-2 sm:mb-3" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
             Alight
           </h1>
-          <p className="text-lg text-foreground/90">Your pocket financial analyst</p>
+          <p className="text-sm sm:text-lg text-foreground/90">Your pocket financial analyst</p>
 
-          <div className={`absolute top-0 right-0 transition-all duration-300 ${activeCalc === 'breakeven' ? 'opacity-0 pointer-events-none -translate-y-5' : 'opacity-100'}`}>
-            <select className="glass-select" value={industry} onChange={e => setIndustry(e.target.value)}>
+          <div className={`mt-4 sm:mt-0 sm:absolute sm:top-0 sm:right-0 transition-all duration-300 ${activeCalc === 'breakeven' ? 'opacity-0 pointer-events-none -translate-y-5' : 'opacity-100'}`}>
+            <select className="glass-select w-full sm:w-auto" value={industry} onChange={e => setIndustry(e.target.value)}>
               {INDUSTRIES.map(i => <option key={i.value} value={i.value}>{i.label}</option>)}
             </select>
           </div>
@@ -139,8 +139,8 @@ export default function Index() {
           className={`mt-20 mb-16 text-center transition-all duration-700 ${footerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
           style={{ filter: footerVisible ? 'blur(0px)' : 'blur(8px)' }}
         >
-          <div className="flex gap-4 items-center justify-center mb-3 flex-wrap">
-            <p className="text-[15px] text-foreground/50">Confidential Preview - Not for distribution</p>
+          <div className="flex gap-3 sm:gap-4 items-center justify-center mb-3 flex-wrap">
+            <p className="text-xs sm:text-[15px] text-foreground/50">Confidential Preview</p>
             <button onClick={() => setShowSavedDeals(true)} className="text-xs text-foreground/60 hover:text-foreground transition-colors cursor-pointer underline">
               Saved Deals ({savedDeals.length})
             </button>
@@ -153,7 +153,7 @@ export default function Index() {
       </div>
 
       {/* Fixed bottom — calculator ribbon only */}
-      <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-6 z-50">
+      <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-4 sm:pb-6 z-50 px-4">
         {ribbonCollapsed ? (
           <div className="home-indicator" onClick={() => setRibbonCollapsed(false)}>
             <div className="home-indicator-pill" />

@@ -101,7 +101,7 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
 
   return (
     <div className="glass-card">
-      <h2 className="text-2xl font-semibold text-foreground mb-8 tracking-tight">Deal ROI Calculator</h2>
+      <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-6 sm:mb-8 tracking-tight">Deal ROI Calculator</h2>
       <CalculatorInput label="How much are you buying it for?" value={purchasePrice} onChange={setPurchasePrice} prefix="$" formatCommas placeholder="50,000,000" />
       <CalculatorInput label="What's the annual profit (EBITDA)?" value={ebitda} onChange={setEbitda} prefix="$" formatCommas placeholder="6,250,000" />
       <CalculatorInput label="When do you plan to sell? (years)" value={exitYears} onChange={setExitYears} suffix="years" placeholder="5" />
@@ -111,8 +111,8 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
       </div>
 
       {results && (
-        <div ref={resultsRef} className="mt-12 pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
-          <div className="flex gap-3 mb-6 flex-wrap items-center">
+        <div ref={resultsRef} className="mt-10 sm:mt-12 pt-10 sm:pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
+          <div className="flex gap-2 sm:gap-3 mb-6 flex-wrap items-center">
             {(['base', 'bull', 'bear'] as Scenario[]).map(s => (
               <button key={s} className={`scenario-btn ${scenario === s ? 'active' : ''}`} onClick={() => switchScenario(s)}>{SCENARIO_MULTIPLIERS[s].label}</button>
             ))}
@@ -122,26 +122,26 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
 
           <div className="mb-8">
             <div className="text-[15px] font-medium text-muted-foreground mb-2">Your Return (True IRR)</div>
-            <div className="text-5xl font-bold text-foreground tracking-tight">{results.irr.toFixed(1)}%</div>
-            <div className="text-lg font-medium text-muted-foreground mt-2">
-              Total Return: {results.moic.toFixed(2)}x (incl. cash flows) • Exit Value: {formatCurrency(results.exitValue, country)}
+            <div className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">{results.irr.toFixed(1)}%</div>
+            <div className="text-sm sm:text-lg font-medium text-muted-foreground mt-2">
+              Total Return: {results.moic.toFixed(2)}x • Exit: {formatCurrency(results.exitValue, country)}
             </div>
           </div>
 
           <div className="comparison-section">
             <h3 className="text-lg font-semibold text-foreground mb-5">Deal Quality</h3>
             <div className="metrics-ribbon">
-              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Quality Score</div><div className="text-3xl font-bold text-foreground">{results.qualityScore}/10</div></div>
-              <div className="liquid-glass-box"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Cash Return</div><div className="text-3xl font-bold text-foreground">{results.cashReturn.toFixed(0)}%</div></div>
-              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Payback Period</div><div className="text-3xl font-bold text-foreground">{results.paybackPeriod.toFixed(1)} yrs</div></div>
+              <div className="text-center"><div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">Quality</div><div className="text-2xl sm:text-3xl font-bold text-foreground">{results.qualityScore}/10</div></div>
+              <div className="liquid-glass-box"><div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">Cash Return</div><div className="text-2xl sm:text-3xl font-bold text-foreground">{results.cashReturn.toFixed(0)}%</div></div>
+              <div className="text-center"><div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">Payback</div><div className="text-2xl sm:text-3xl font-bold text-foreground">{results.paybackPeriod.toFixed(1)} yrs</div></div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Entry Multiple</div><div className="text-2xl font-bold text-foreground mb-1">{results.entryMultiple.toFixed(1)}x</div><div className="text-[11px] text-muted-foreground">Price / Annual Profit</div></div>
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Annual Yield</div><div className="text-2xl font-bold text-foreground mb-1">{results.annualYield.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Yearly return on investment</div></div>
+              <div className="liquid-glass-box p-3 sm:p-4"><div className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Entry Multiple</div><div className="text-xl sm:text-2xl font-bold text-foreground mb-1">{results.entryMultiple.toFixed(1)}x</div><div className="text-[10px] sm:text-[11px] text-muted-foreground">Price / Profit</div></div>
+              <div className="liquid-glass-box p-3 sm:p-4"><div className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Annual Yield</div><div className="text-xl sm:text-2xl font-bold text-foreground mb-1">{results.annualYield.toFixed(1)}%</div><div className="text-[10px] sm:text-[11px] text-muted-foreground">Yearly return</div></div>
             </div>
 
-            <div className="flex gap-4 items-stretch">
+            <div className="flex flex-col sm:flex-row gap-4 items-stretch">
               <div className="market-analysis-box">
                 <div className="text-[13px] font-semibold text-foreground mb-3 tracking-wide">DEAL ECONOMICS</div>
                 <AIAnalysis
@@ -161,7 +161,7 @@ export default function DealROICalc({ industry, country, onCountryChange, onSave
             </div>
           </div>
 
-          <div className="flex gap-3 mt-4">
+          <div className="flex gap-2 sm:gap-3 mt-4">
             <button className="export-btn" onClick={exportMemo}>Export Memo</button>
             <button className="export-btn" onClick={resetToBase}>Reset to Base</button>
             <button className="export-btn" onClick={() => onSave({ purchasePrice, ebitda, exitYears, exitMultiple }, `IRR: ${results.irr.toFixed(1)}% | MOIC: ${results.moic.toFixed(2)}x`)}>Save Deal</button>
