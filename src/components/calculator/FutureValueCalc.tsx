@@ -27,7 +27,7 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
   const [showExportDialog, setShowExportDialog] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  const calculate = (overrideGrowth?: number) => {
+  const calculate = (overrideGrowth?: number, overrideCountry?: string) => {
     const cv = parseNumericInput(currentValue);
     const gr = overrideGrowth ?? parseNumericInput(growthRate);
     const yr = parseInt(years) || 0;
@@ -37,13 +37,14 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
     const fv = calculateFutureValue(cv, gr, yr);
     const totalGrowth = fv - cv;
     const percentGrowth = ((fv - cv) / cv * 100);
-    const ind = getIndustryData(industry, country);
+    const ind = getIndustryData(industry, overrideCountry ?? country);
 
-    // Inflation-adjusted calculations
+    // Inflation-adjusted: discount future value to today's purchasing power
     const inflationRate = ind.avgInflation;
-    const realFV = fv / Math.pow(1 + inflationRate / 100, yr);
+    const inflationMultiplier = Math.pow(1 + inflationRate / 100, yr);
+    const realFV = fv / inflationMultiplier;
     const inflationLoss = fv - realFV;
-    const purchasingPowerRetained = (realFV / fv) * 100;
+    const purchasingPowerRetained = inflationMultiplier > 0 ? (realFV / fv) * 100 : 100;
 
     const qualityScore = calculateQualityScore({
       performanceVsBenchmark: gr / ind.avgGrowth,
@@ -116,7 +117,7 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
               </button>
             ))}
             <div className="flex-1" />
-            <CountrySelector value={country} onChange={(c) => { onCountryChange(c); setTimeout(() => calculate(), 50); }} />
+            <CountrySelector value={country} onChange={(c) => { onCountryChange(c); setTimeout(() => calculate(undefined, c), 50); }} />
           </div>
 
           <div className="mb-8">
