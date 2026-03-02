@@ -84,7 +84,7 @@ export default function PaybackCalc({ industry, country, onCountryChange, onCalc
 
   return (
     <div className="glass-card">
-      <h2 className="text-2xl font-semibold text-foreground mb-8 tracking-tight">Investment Payback Calculator</h2>
+      <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-6 sm:mb-8 tracking-tight">Investment Payback Calculator</h2>
       <CalculatorInput label="How much does this investment cost?" value={investmentCost} onChange={setInvestmentCost} prefix="$" formatCommas placeholder="2,000,000" />
       <CalculatorInput label="How much will you save/earn per year?" value={annualSavings} onChange={setAnnualSavings} prefix="$" formatCommas placeholder="600,000" />
       <div className="flex justify-center mt-8">
@@ -92,50 +92,49 @@ export default function PaybackCalc({ industry, country, onCountryChange, onCalc
       </div>
 
       {results && (
-        <div ref={resultsRef} className="mt-12 pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
+        <div ref={resultsRef} className="mt-10 sm:mt-12 pt-10 sm:pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
           <div className="flex gap-3 mb-6 justify-end">
             <CountrySelector value={country} onChange={(c) => { onCountryChange(c); setTimeout(() => calculate(), 50); }} />
           </div>
 
           <div className="mb-8">
             <div className="text-[15px] font-medium text-muted-foreground mb-2">Payback Period</div>
-            <div className="text-5xl font-bold text-foreground tracking-tight">
+            <div className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
               {results.paybackYears < 1 ? `${(results.paybackYears * 12).toFixed(1)} months` : `${results.paybackYears.toFixed(1)} years`}
             </div>
-            <div className="text-lg font-medium text-muted-foreground mt-2">Annual ROI: {results.roi.toFixed(1)}%</div>
+            <div className="text-sm sm:text-lg font-medium text-muted-foreground mt-2">Annual ROI: {results.roi.toFixed(1)}%</div>
           </div>
 
           <div className="comparison-section">
             <h3 className="text-lg font-semibold text-foreground mb-5">5-Year Projection</h3>
             <div className="metrics-ribbon">
               <div className="text-center">
-                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">3-Year Profit</div>
-                <div className="text-3xl font-bold text-foreground">
-                  {results.year3 < 0 && <span className="text-destructive/70 text-lg mr-1">Loss </span>}
+                <div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">3-Year</div>
+                <div className="text-2xl sm:text-3xl font-bold text-foreground">
+                  {results.year3 < 0 && <span className="text-destructive/70 text-sm mr-1">Loss </span>}
                   {formatProfit(results.year3)}
                 </div>
               </div>
               <div className="liquid-glass-box">
-                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">5-Year Profit</div>
-                <div className="text-3xl font-bold text-foreground">
-                  {results.year5 < 0 && <span className="text-destructive/70 text-lg mr-1">Loss </span>}
+                <div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">5-Year</div>
+                <div className="text-2xl sm:text-3xl font-bold text-foreground">
+                  {results.year5 < 0 && <span className="text-destructive/70 text-sm mr-1">Loss </span>}
                   {formatProfit(results.year5)}
                 </div>
               </div>
-              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Annual Return</div><div className="text-3xl font-bold text-foreground">{results.roi.toFixed(1)}%</div></div>
+              <div className="text-center"><div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">Return</div><div className="text-2xl sm:text-3xl font-bold text-foreground">{results.roi.toFixed(1)}%</div></div>
             </div>
             <div className="mt-5 text-center">
               <span className={`inline-block px-4 py-2 rounded-lg text-xs font-semibold ${results.recommendation.cls}`}>{results.recommendation.text}</span>
-              <div className="mt-2 text-[13px] text-muted-foreground">{results.recommendation.tooltip}</div>
             </div>
           </div>
 
           <div className="comparison-section">
             <h3 className="text-lg font-semibold text-foreground mb-5">Inflation-Adjusted Analysis</h3>
             <div className="metrics-ribbon">
-              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Inflation Rate</div><div className="text-3xl font-bold text-foreground">{results.ind.avgInflation.toFixed(1)}%</div></div>
-              <div className="liquid-glass-box"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Real Value of Savings</div><div className="text-3xl font-bold text-foreground">{formatCurrency(results.realCumulativeSavings, country)}</div></div>
-              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Purchasing Power</div><div className="text-3xl font-bold text-foreground">{results.purchasingPowerRetained.toFixed(0)}%</div></div>
+              <div className="text-center"><div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">Inflation</div><div className="text-2xl sm:text-3xl font-bold text-foreground">{results.ind.avgInflation.toFixed(1)}%</div></div>
+              <div className="liquid-glass-box"><div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">Real Value</div><div className="text-2xl sm:text-3xl font-bold text-foreground">{formatCurrency(results.realCumulativeSavings, country)}</div></div>
+              <div className="text-center"><div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">Power</div><div className="text-2xl sm:text-3xl font-bold text-foreground">{results.purchasingPowerRetained.toFixed(0)}%</div></div>
             </div>
 
             <div className="market-analysis-box mt-6">
@@ -150,7 +149,7 @@ export default function PaybackCalc({ industry, country, onCountryChange, onCalc
             </div>
           </div>
 
-          <div className="flex gap-3 mt-4">
+          <div className="flex gap-2 sm:gap-3 mt-4">
             <button className="export-btn" onClick={exportMemo}>Export Memo</button>
           </div>
         </div>

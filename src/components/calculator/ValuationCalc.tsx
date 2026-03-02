@@ -98,7 +98,7 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
 
   return (
     <div className="glass-card">
-      <h2 className="text-2xl font-semibold text-foreground mb-8 tracking-tight">What's My Company Worth?</h2>
+      <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-6 sm:mb-8 tracking-tight">What's My Company Worth?</h2>
       <CalculatorInput label="What's your annual revenue?" value={revenue} onChange={setRevenue} prefix="$" formatCommas placeholder="10,000,000" />
       <CalculatorInput label="What's your annual profit (EBITDA)?" value={ebitda} onChange={setEbitda} prefix="$" formatCommas placeholder="2,500,000" />
       <div className="flex justify-center mt-8">
@@ -106,8 +106,8 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
       </div>
 
       {results && (
-        <div ref={resultsRef} className="mt-12 pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
-          <div className="flex gap-3 mb-6 flex-wrap items-center">
+        <div ref={resultsRef} className="mt-10 sm:mt-12 pt-10 sm:pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
+          <div className="flex gap-2 sm:gap-3 mb-6 flex-wrap items-center">
             {(['conservative', 'market', 'optimistic'] as ValuationScenario[]).map(s => (
               <button key={s} className={`scenario-btn ${valuationScenario === s ? 'active' : ''}`} onClick={() => setValuationScenario(s)}>
                 {scenarioLabels[s]}
@@ -119,19 +119,19 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
 
           <div className="mb-8">
             <div className="text-[15px] font-medium text-muted-foreground mb-2">Estimated Company Value</div>
-            <div className="text-5xl font-bold text-foreground tracking-tight">{formatCurrency(getActiveValuation(), country)}</div>
-            <div className="text-lg font-medium text-muted-foreground mt-2">Based on {results.ind.name} industry multiples in {results.ind.marketName}</div>
+            <div className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight break-words">{formatCurrency(getActiveValuation(), country)}</div>
+            <div className="text-sm sm:text-lg font-medium text-muted-foreground mt-2">Based on {results.ind.name} multiples in {results.ind.marketName}</div>
           </div>
 
           <div className="comparison-section">
             <h3 className="text-lg font-semibold text-foreground mb-5">Valuation Analysis</h3>
             <div className="metrics-ribbon">
-              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Quality Score</div><div className="text-3xl font-bold text-foreground">{results.qualityScore}/10</div></div>
-              <div className="liquid-glass-box"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">EBITDA Margin</div><div className="text-3xl font-bold text-foreground">{results.margin.toFixed(1)}%</div></div>
-              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">EV/Revenue</div><div className="text-3xl font-bold text-foreground">{getActiveEvToRevenue().toFixed(1)}x</div></div>
+              <div className="text-center"><div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">Quality</div><div className="text-2xl sm:text-3xl font-bold text-foreground">{results.qualityScore}/10</div></div>
+              <div className="liquid-glass-box"><div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">EBITDA Margin</div><div className="text-2xl sm:text-3xl font-bold text-foreground">{results.margin.toFixed(1)}%</div></div>
+              <div className="text-center"><div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">EV/Revenue</div><div className="text-2xl sm:text-3xl font-bold text-foreground">{getActiveEvToRevenue().toFixed(1)}x</div></div>
             </div>
 
-            <div className="flex gap-4 items-stretch">
+            <div className="flex flex-col sm:flex-row gap-4 items-stretch">
               <div className="market-analysis-box">
                 <div className="text-[13px] font-semibold text-foreground mb-3 tracking-wide">VALUATION ANALYSIS</div>
                 <AIAnalysis
@@ -151,7 +151,7 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
             </div>
           </div>
 
-          <div className="flex gap-3 mt-4">
+          <div className="flex gap-2 sm:gap-3 mt-4">
             <button className="export-btn" onClick={exportMemo}>Export Memo</button>
             <button className="export-btn" onClick={() => onSave({ revenue, ebitda }, formatCurrency(getActiveValuation(), country))}>Save Deal</button>
           </div>

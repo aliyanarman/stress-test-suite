@@ -24,26 +24,26 @@ export default function CalculatorInput({
   }, [onChange, formatCommas]);
 
   return (
-    <div className="mb-8">
-      <label className="block text-[15px] font-medium text-foreground mb-2.5 tracking-tight">
+    <div className="mb-6 sm:mb-8">
+      <label className="block text-[13px] sm:text-[15px] font-medium text-foreground mb-2 sm:mb-2.5 tracking-tight">
         {label}
       </label>
       <div className="relative">
         {prefix && (
-          <span className="absolute left-5 top-1/2 -translate-y-1/2 text-[17px] font-medium text-foreground pointer-events-none">
+          <span className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-[15px] sm:text-[17px] font-medium text-foreground pointer-events-none">
             {prefix}
           </span>
         )}
         <input
           type="text"
           inputMode="numeric"
-          className={`glass-input ${prefix ? 'pl-9' : ''} ${suffix ? 'pr-14' : ''}`}
+          className={`glass-input ${prefix ? 'pl-8 sm:pl-9' : ''} ${suffix ? 'pr-12 sm:pr-14' : ''}`}
           value={value}
           onChange={handleChange}
           placeholder={placeholder}
         />
         {suffix && (
-          <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[17px] font-medium text-muted-foreground pointer-events-none">
+          <span className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 text-[13px] sm:text-[17px] font-medium text-muted-foreground pointer-events-none truncate max-w-[80px] sm:max-w-none">
             {suffix}
           </span>
         )}

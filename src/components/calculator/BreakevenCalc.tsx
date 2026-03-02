@@ -71,9 +71,9 @@ export default function BreakevenCalc({ industry, country, onCountryChange, onIn
 
   return (
     <div className="glass-card">
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-semibold text-foreground tracking-tight">Breakeven Calculator</h2>
-        <select className="glass-select" value={industry} onChange={e => onIndustryChange(e.target.value)} style={{ width: 'auto', padding: '10px 35px 10px 16px' }}>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">Breakeven Calculator</h2>
+        <select className="glass-select w-full sm:w-auto" value={industry} onChange={e => onIndustryChange(e.target.value)}>
           {INDUSTRIES.map(i => <option key={i.value} value={i.value}>{i.label}</option>)}
         </select>
       </div>
@@ -85,23 +85,23 @@ export default function BreakevenCalc({ industry, country, onCountryChange, onIn
       </div>
 
       {results && (
-        <div ref={resultsRef} className="mt-12 pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
+        <div ref={resultsRef} className="mt-10 sm:mt-12 pt-10 sm:pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
           <div className="flex gap-3 mb-6 justify-end">
             <CountrySelector value={country} onChange={(c) => { onCountryChange(c); setTimeout(() => calculate(), 50); }} />
           </div>
 
           <div className="mb-8">
             <div className="text-[15px] font-medium text-muted-foreground mb-2">Units Needed to Breakeven</div>
-            <div className="text-5xl font-bold text-foreground tracking-tight">{results.breakevenUnits.toLocaleString()}</div>
-            <div className="text-lg font-medium text-muted-foreground mt-2">Revenue needed: {formatCurrency(results.breakevenRevenue, country)} per month</div>
+            <div className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">{results.breakevenUnits.toLocaleString()}</div>
+            <div className="text-sm sm:text-lg font-medium text-muted-foreground mt-2">Revenue needed: {formatCurrency(results.breakevenRevenue, country)}/mo</div>
           </div>
 
           <div className="comparison-section">
             <h3 className="text-lg font-semibold text-foreground mb-5">Business Economics</h3>
             <div className="metrics-ribbon">
-              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Profit Margin</div><div className="text-3xl font-bold text-foreground">{results.profitMargin.toFixed(1)}%</div></div>
-              <div className="liquid-glass-box"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">At Volume</div><div className="text-3xl font-bold text-foreground">{results.breakevenUnits.toLocaleString()}</div></div>
-              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Contribution/Unit</div><div className="text-3xl font-bold text-foreground">{formatCurrency(results.contribution, country)}</div></div>
+              <div className="text-center"><div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">Profit Margin</div><div className="text-2xl sm:text-3xl font-bold text-foreground">{results.profitMargin.toFixed(1)}%</div></div>
+              <div className="liquid-glass-box"><div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">At Volume</div><div className="text-2xl sm:text-3xl font-bold text-foreground">{results.breakevenUnits.toLocaleString()}</div></div>
+              <div className="text-center"><div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mb-2">Per Unit</div><div className="text-2xl sm:text-3xl font-bold text-foreground">{formatCurrency(results.contribution, country)}</div></div>
             </div>
 
             <div className="market-analysis-box mt-6">
@@ -116,7 +116,7 @@ export default function BreakevenCalc({ industry, country, onCountryChange, onIn
             </div>
           </div>
 
-          <div className="flex gap-3 mt-4">
+          <div className="flex gap-2 sm:gap-3 mt-4">
             <button className="export-btn" onClick={exportMemo}>Export Memo</button>
           </div>
         </div>
