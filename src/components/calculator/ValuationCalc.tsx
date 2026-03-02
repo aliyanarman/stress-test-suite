@@ -8,6 +8,8 @@ import AIAnalysis from './AIAnalysis';
 import CountrySelector from './CountrySelector';
 import ExportMemoDialog from './ExportMemoDialog';
 
+type ValuationScenario = 'conservative' | 'market' | 'optimistic';
+
 interface Props {
   industry: string;
   country: string;
@@ -22,6 +24,7 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
   const [results, setResults] = useState<any>(null);
   const [aiAnalysisText, setAiAnalysisText] = useState('');
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [valuationScenario, setValuationScenario] = useState<ValuationScenario>('market');
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const calculate = () => {
@@ -54,24 +57,43 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
   };
 
+  const getActiveValuation = () => {
+    if (!results) return 0;
+    if (valuationScenario === 'conservative') return results.valuationLow;
+    if (valuationScenario === 'optimistic') return results.valuationHigh;
+    return results.valuationMid;
+  };
+
+  const getActiveEvToRevenue = () => {
+    if (!results) return 0;
+    const rev = parseNumericInput(revenue);
+    return getActiveValuation() / rev;
+  };
+
   const doExport = useCallback(() => {
     if (!results) return;
     downloadMemoPDF({
       type: 'Valuation',
       inputs: { Revenue: revenue, EBITDA: ebitda },
-      results: { 'Conservative (25th %ile)': formatCurrency(results.valuationLow, country), 'Market Value (50th %ile)': formatCurrency(results.valuationMid, country), 'Optimistic (75th %ile)': formatCurrency(results.valuationHigh, country), 'EBITDA Margin': results.margin.toFixed(1) + '%', 'EV/Revenue': results.evToRevenue.toFixed(1) + 'x' },
+      results: { 'Conservative': formatCurrency(results.valuationLow, country), 'Market Value': formatCurrency(results.valuationMid, country), 'Optimistic': formatCurrency(results.valuationHigh, country), 'EBITDA Margin': results.margin.toFixed(1) + '%', 'EV/Revenue': results.evToRevenue.toFixed(1) + 'x' },
       qualityScore: results.qualityScore, decision: results.decision.label,
       analysis: aiAnalysisText,
-      industry, country, scenario: 'base',
+      industry, country, scenario: valuationScenario,
       calculatorInputs: { revenue, ebitda },
       calculatorResults: { valuationLow: results.valuationLow, valuationMid: results.valuationMid, valuationHigh: results.valuationHigh, margin: results.margin, evToRevenue: results.evToRevenue, qualityScore: results.qualityScore },
     });
     setShowExportDialog(false);
-  }, [results, revenue, ebitda, aiAnalysisText, industry, country]);
+  }, [results, revenue, ebitda, aiAnalysisText, industry, country, valuationScenario]);
 
   const exportMemo = () => {
     if (!results) return;
     setShowExportDialog(true);
+  };
+
+  const scenarioLabels: Record<ValuationScenario, string> = {
+    conservative: 'Conservative',
+    market: 'Market Value',
+    optimistic: 'Optimistic',
   };
 
   return (
@@ -85,13 +107,19 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
 
       {results && (
         <div ref={resultsRef} className="mt-12 pt-12 border-t border-foreground/10 animate-[fadeIn_0.3s_ease]">
-          <div className="flex gap-3 mb-6 justify-end">
+          <div className="flex gap-3 mb-6 flex-wrap items-center">
+            {(['conservative', 'market', 'optimistic'] as ValuationScenario[]).map(s => (
+              <button key={s} className={`scenario-btn ${valuationScenario === s ? 'active' : ''}`} onClick={() => setValuationScenario(s)}>
+                {scenarioLabels[s]}
+              </button>
+            ))}
+            <div className="flex-1" />
             <CountrySelector value={country} onChange={(c) => { onCountryChange(c); setTimeout(() => calculate(), 50); }} />
           </div>
 
           <div className="mb-8">
             <div className="text-[15px] font-medium text-muted-foreground mb-2">Estimated Company Value</div>
-            <div className="text-5xl font-bold text-foreground tracking-tight">{formatCurrency(results.valuationMid, country)}</div>
+            <div className="text-5xl font-bold text-foreground tracking-tight">{formatCurrency(getActiveValuation(), country)}</div>
             <div className="text-lg font-medium text-muted-foreground mt-2">Based on {results.ind.name} industry multiples in {results.ind.marketName}</div>
           </div>
 
@@ -100,22 +128,7 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
             <div className="metrics-ribbon">
               <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Quality Score</div><div className="text-3xl font-bold text-foreground">{results.qualityScore}/10</div></div>
               <div className="liquid-glass-box"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">EBITDA Margin</div><div className="text-3xl font-bold text-foreground">{results.margin.toFixed(1)}%</div></div>
-              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">EV/Revenue</div><div className="text-3xl font-bold text-foreground">{results.evToRevenue.toFixed(1)}x</div></div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="liquid-glass-box p-4">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Conservative</div>
-                <div className="text-xl font-bold text-foreground">{formatCurrency(results.valuationLow, country)}</div>
-              </div>
-              <div className="liquid-glass-box p-4">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Market Value</div>
-                <div className="text-xl font-bold text-foreground">{formatCurrency(results.valuationMid, country)}</div>
-              </div>
-              <div className="liquid-glass-box p-4">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Optimistic</div>
-                <div className="text-xl font-bold text-foreground">{formatCurrency(results.valuationHigh, country)}</div>
-              </div>
+              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">EV/Revenue</div><div className="text-3xl font-bold text-foreground">{getActiveEvToRevenue().toFixed(1)}x</div></div>
             </div>
 
             <div className="flex gap-4 items-stretch">
@@ -124,7 +137,7 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
                 <AIAnalysis
                   calculatorType="Valuation"
                   inputs={{ revenue, ebitda }}
-                  results={{ valuationLow: results.valuationLow, valuationMid: results.valuationMid, valuationHigh: results.valuationHigh, margin: results.margin, evToRevenue: results.evToRevenue, qualityScore: results.qualityScore }}
+                  results={{ valuationLow: results.valuationLow, valuationMid: results.valuationMid, valuationHigh: results.valuationHigh, margin: results.margin, evToRevenue: getActiveEvToRevenue(), qualityScore: results.qualityScore }}
                   industry={industry} country={country}
                   onAnalysisComplete={setAiAnalysisText}
                 />
@@ -140,7 +153,7 @@ export default function ValuationCalc({ industry, country, onCountryChange, onSa
 
           <div className="flex gap-3 mt-4">
             <button className="export-btn" onClick={exportMemo}>Export Memo</button>
-            <button className="export-btn" onClick={() => onSave({ revenue, ebitda }, formatCurrency(results.valuationMid, country))}>Save Deal</button>
+            <button className="export-btn" onClick={() => onSave({ revenue, ebitda }, formatCurrency(getActiveValuation(), country))}>Save Deal</button>
           </div>
         </div>
       )}

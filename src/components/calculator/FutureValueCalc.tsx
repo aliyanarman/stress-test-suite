@@ -39,6 +39,12 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
     const percentGrowth = ((fv - cv) / cv * 100);
     const ind = getIndustryData(industry, country);
 
+    // Inflation-adjusted calculations
+    const inflationRate = ind.avgInflation;
+    const realFV = fv / Math.pow(1 + inflationRate / 100, yr);
+    const inflationLoss = fv - realFV;
+    const purchasingPowerRetained = (realFV / fv) * 100;
+
     const qualityScore = calculateQualityScore({
       performanceVsBenchmark: gr / ind.avgGrowth,
       riskAdjusted: Math.min(1, gr / (ind.excellentGrowth * 1.2)),
@@ -46,7 +52,7 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
     });
     const decision = getExecutiveDecision(qualityScore, 'growth');
 
-    setResults({ fv, totalGrowth, percentGrowth, qualityScore, decision, ind, gr, yr });
+    setResults({ fv, totalGrowth, percentGrowth, qualityScore, decision, ind, gr, yr, realFV, inflationLoss, purchasingPowerRetained, inflationRate });
   };
 
   const handleCalculateClick = () => {
@@ -76,12 +82,12 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
     downloadMemoPDF({
       type: 'Future Value',
       inputs: { 'Current Value': formatCurrency(parseNumericInput(currentValue), country), 'Growth Rate': growthRate + '%', 'Years': years },
-      results: { 'Future Value': formatCurrency(results.fv, country), 'Total Growth': formatCurrency(results.totalGrowth, country), 'Percent Growth': results.percentGrowth.toFixed(1) + '%' },
+      results: { 'Future Value': formatCurrency(results.fv, country), 'Total Growth': formatCurrency(results.totalGrowth, country), 'Percent Growth': results.percentGrowth.toFixed(1) + '%', 'Real Value (Inflation-Adj)': formatCurrency(results.realFV, country), 'Purchasing Power Retained': results.purchasingPowerRetained.toFixed(0) + '%' },
       qualityScore: results.qualityScore, decision: results.decision.label,
       analysis: aiAnalysisText,
       industry, country, scenario,
       calculatorInputs: { currentValue, growthRate, years },
-      calculatorResults: { futureValue: results.fv, totalGrowth: results.totalGrowth, percentGrowth: results.percentGrowth, qualityScore: results.qualityScore, annualGrowth: results.gr },
+      calculatorResults: { futureValue: results.fv, totalGrowth: results.totalGrowth, percentGrowth: results.percentGrowth, qualityScore: results.qualityScore, annualGrowth: results.gr, realFutureValue: results.realFV, inflationLoss: results.inflationLoss, purchasingPowerRetained: results.purchasingPowerRetained },
     });
     setShowExportDialog(false);
   }, [results, currentValue, growthRate, years, aiAnalysisText, industry, country, scenario]);
@@ -130,8 +136,16 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Average Growth</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.avgGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">{results.ind.name} avg in {results.ind.marketName}</div></div>
-              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Top Performers</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.excellentGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Leaders in {results.ind.marketName}</div></div>
+              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Average Growth</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.avgGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">{results.ind.name} · {results.ind.marketName}</div></div>
+              <div className="liquid-glass-box p-4"><div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Top Performers</div><div className="text-2xl font-bold text-foreground mb-1">{results.ind.excellentGrowth.toFixed(1)}%</div><div className="text-[11px] text-muted-foreground">Leaders · {results.ind.marketName}</div></div>
+            </div>
+
+            {/* Inflation-Adjusted Analysis */}
+            <h3 className="text-lg font-semibold text-foreground mb-5 mt-8">Inflation-Adjusted Analysis</h3>
+            <div className="metrics-ribbon">
+              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Inflation Rate</div><div className="text-3xl font-bold text-foreground">{results.inflationRate.toFixed(1)}%</div></div>
+              <div className="liquid-glass-box"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Real Value</div><div className="text-3xl font-bold text-foreground">{formatCurrency(results.realFV, country)}</div></div>
+              <div className="text-center"><div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Purchasing Power</div><div className="text-3xl font-bold text-foreground">{results.purchasingPowerRetained.toFixed(0)}%</div></div>
             </div>
 
             <div className="flex gap-4 items-stretch">
@@ -140,16 +154,16 @@ export default function FutureValueCalc({ industry, country, onCountryChange, on
                 <AIAnalysis
                   calculatorType="Future Value"
                   inputs={{ currentValue, growthRate, years }}
-                  results={{ futureValue: results.fv, totalGrowth: results.totalGrowth, percentGrowth: results.percentGrowth, qualityScore: results.qualityScore, annualGrowth: results.gr }}
+                  results={{ futureValue: results.fv, totalGrowth: results.totalGrowth, percentGrowth: results.percentGrowth, qualityScore: results.qualityScore, annualGrowth: results.gr, realFutureValue: results.realFV, inflationLoss: results.inflationLoss, purchasingPowerRetained: results.purchasingPowerRetained, inflationRate: results.inflationRate }}
                   industry={industry} country={country}
                   onAnalysisComplete={setAiAnalysisText}
                 />
               </div>
               <RadarChart qualityScore={results.qualityScore} scores={[
-                { label: 'Quality', value: Math.min(100, (results.gr / 15) * 100) },
+                { label: 'Quality', value: Math.min(100, (results.purchasingPowerRetained / 100) * 100) },
                 { label: 'Growth', value: Math.min(100, (results.gr / 20) * 100) },
-                { label: 'Market', value: Math.min(100, (results.gr / 12) * 100) },
-                { label: 'Risk', value: results.gr <= 15 && results.gr >= 5 ? 75 : 60 },
+                { label: 'Market', value: Math.min(100, (results.gr / results.ind.avgGrowth) * 50) },
+                { label: 'Risk', value: results.purchasingPowerRetained >= 80 ? 80 : results.purchasingPowerRetained >= 60 ? 60 : 40 },
               ]} />
             </div>
           </div>
